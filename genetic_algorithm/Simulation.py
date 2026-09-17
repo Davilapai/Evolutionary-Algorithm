@@ -129,6 +129,6 @@ print("Select the number of runs")
 runs = int(input())
 print("Select the mutation factor (0->1)")
 mutation_factor = float(input())
-Simulation.run_simulation(n, n, runs, mutation_factor)
+Simulation.run_simulation(n, m, runs, mutation_factor)
 
 
