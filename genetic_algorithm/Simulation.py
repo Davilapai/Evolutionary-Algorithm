@@ -1,6 +1,10 @@
 from Individual import Individual
+import os
+import re
+from pathlib import Path
 import numpy as np
 import random
+import json
 
 class Simulation:
     def __init__(self, n : int, m : int):
@@ -10,16 +14,34 @@ class Simulation:
         self.population = np.array([Individual.random_Individual_legal(n) for _ in range(m)])
         self.n = n
         self.m = m
+        self.data = {}
 
     def evaluate(self):
         fitness = [individual.fitness() for individual in self.population]
         self.population = self.population[np.argsort(fitness)[::-1]]
+        return fitness
  
     def select_parents(self):
         parents = []
         for i in range(0, 2 * self.m // 3 - 1, 2):
             parents.append([self.population[i], self.population[i + 1]])
         return np.array(parents)
+    def save_data(self, file_path):
+        json_string = json.dumps(self.data, indent=4, ensure_ascii=False)
+        
+        # This keeps each individual chromosome flat, but leaves the outer population array stacked.
+        compact_string = re.sub(
+            r'\[\s+([^\[\]]*?)\s+\]', 
+            lambda m: '[' + re.sub(r'\s+', ' ', m.group(1)).strip() + ']', 
+            json_string
+        )
+        
+        # 3. Clean up the trailing commas inside the outer array to keep rows vertically aligned
+        compact_string = re.sub(r'\],\s*\n\s*\[', '],\n            [', compact_string)
+        
+        # 4. Save to disk
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(compact_string)
 
     @staticmethod
     def crosover(couple):
@@ -55,11 +77,15 @@ class Simulation:
         # 1. (Initialize)
         sim = Simulation(n, m)
 
-        for _ in range(runs):
+        for i in range(runs):
 
             # 2. (Evaluate)
-            sim.evaluate()
+            evaluation = sim.evaluate()
             print(f"{sim.population[0].state} fit: {sim.population[0].fitness()}")
+            sim.data[f"gen {i}"] = {
+                "population": [i.state.tolist() for i in sim.population],
+                "evaluation" : evaluation 
+            }
             
             # 3. (Select Parents)
             parents = sim.select_parents()
@@ -87,9 +113,22 @@ class Simulation:
             sim.population = np.array(new_population)
 
         # 7. (Result)
-        sim.evaluate()
+        evaluation = sim.evaluate()
+        sim.data["result"] = {
+            "population": [i.state.tolist() for i in sim.population],
+            "evaluation": evaluation 
+        }
         print(f"{sim.population[0].state}, {sim.population[0].fitness()}")
+        sim.save_data("data/data.json")
 
-Simulation.run_simulation(100, 300, 250, 0.005)
+print("Select the size of the board")
+n = int(input())
+print("Select the size of the population")
+m = int(input())
+print("Select the number of runs")
+runs = int(input())
+print("Select the mutation factor (0->1)")
+mutation_factor = float(input())
+Simulation.run_simulation(n, n, runs, mutation_factor)
 
 
