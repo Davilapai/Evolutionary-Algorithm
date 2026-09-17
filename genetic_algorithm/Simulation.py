@@ -79,11 +79,13 @@ class Simulation:
             for parent1, parent2 in parents:
                 new_population.append(Simulation.crosover([parent1.state, parent2.state]))
                 new_population.append(Simulation.crosover([parent2.state, parent1.state]))
+            for _ in range(m - len(new_population)):
+                x = random.randint(0, (n-1)//2)
+                y = random.randint(0, (n-1)//2)
+                new_population.append(Simulation.crosover([sim.population[x].state, sim.population[y].state]))
                 
             new_population = [Individual(i) for i in new_population]
 
-            for _ in range(m - len(new_population)):
-                new_population.append(Individual.random_Individual_legal(n))
             new_population = np.array(new_population)
 
             # 5. (Mutate)
@@ -95,5 +97,5 @@ class Simulation:
         # 7. (Result)
         print(sim.population[0].state)
 
-Simulation.run_simulation(6, 100, 100, 0.01)
+Simulation.run_simulation(100, 1000, 200, 0.001)
 
