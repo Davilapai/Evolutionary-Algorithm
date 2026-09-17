@@ -6,12 +6,14 @@ class Individual:
     def __init__(self, state: list[int]):
         self.n = len(state)
         self.state = np.array(state)
+        self.array = [i for i in range(self.n)]
 
     def fitness(self) -> int:
         """
         Returns evaluation of the current state of the individual
         """
-        return 0
+        # dumie funcion to test
+        return int(np.count_nonzero(self.array == self.state))
         """
         fit(x) = 
         """
