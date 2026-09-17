@@ -1,14 +1,20 @@
-# Algoritmo evolutivo
+# Algoritmo evolutivo para N reinas
 
-Implementación experimental de un algoritmo genético en Python. El proyecto representa cada individuo como una permutación de valores y aplica operaciones evolutivas sobre una población: evaluación, selección de padres, cruce, mutación y reemplazo.
+Implementación experimental de un algoritmo genético en Python para explorar soluciones al problema de las N reinas. Cada individuo se representa como una permutación: el índice representa una columna y el valor almacenado representa la fila de la reina en esa columna.
+
+El proyecto se encuentra en desarrollo y contiene dos partes relacionadas, pero todavía no integradas completamente: el ciclo evolutivo en `genetic_algorithm/` y el motor de evaluación en `engine/`.
 
 ## Estructura
 
 ```text
+engine/
+└── Engine.py                 # Validación y evaluación de estados de N reinas
 genetic_algorithm/
-├── Individual.py     # Representación, generación y mutación de individuos
-├── Simulation.py     # Población y ciclo de simulación
-└── requirements.txt  # Dependencias de Python
+├── Individual.py             # Individuos, generación y mutación
+└── Simulation.py             # Población y ciclo evolutivo
+docs/
+└── Taller_Investigativo.tex  # Documento del taller
+requirements.txt              # Dependencias de Python
 ```
 
 ## Requisitos
@@ -16,36 +22,47 @@ genetic_algorithm/
 - Python 3.9 o posterior
 - NumPy
 
-Instala la dependencia desde la carpeta del algoritmo:
+Instala las dependencias desde la raíz del repositorio:
 
 ```bash
-cd genetic_algorithm
 python -m pip install -r requirements.txt
 ```
 
 ## Ejecución
 
-Desde `genetic_algorithm/`, ejecuta:
+La simulación incluida puede ejecutarse desde la raíz con:
 
 ```bash
-python Simulation.py
+python genetic_algorithm/Simulation.py
 ```
 
-La simulación de ejemplo crea una población de 100 individuos para un problema de tamaño 6, ejecuta 100 generaciones y utiliza un factor de mutación de `0.01`.
+Actualmente utiliza estos parámetros definidos al final de `Simulation.py`:
+
+- Tamaño del tablero: `100`
+- Población: `1000` individuos
+- Generaciones: `200`
+- Factor de mutación: `0.001`
+
+Durante la ejecución se imprime el mejor estado encontrado en cada generación y, al final, el estado de la población.
 
 ## Funcionamiento
 
-1. Se inicializa una población con individuos legales representados por permutaciones.
-2. Se evalúa y ordena la población según el valor de `fitness`.
-3. Se seleccionan parejas usando aproximadamente dos tercios de la población.
-4. Se generan descendientes mediante un cruce parcialmente mapeado (PMX), que conserva la integridad de las permutaciones.
-5. Se aplica mutación por intercambio de posiciones.
-6. Se completa la población y se repite el ciclo durante el número de generaciones indicado.
+1. Se crea una población de permutaciones válidas.
+2. Se evalúan y ordenan los individuos según su `fitness`.
+3. Se seleccionan parejas entre aproximadamente dos tercios de la población.
+4. Se generan descendientes mediante cruce parcialmente mapeado (PMX), conservando la estructura de permutación.
+5. Se generan individuos adicionales a partir de padres seleccionados para completar la población.
+6. Se aplica mutación por intercambio de posiciones.
+7. Se reemplaza la población y se repite el proceso durante el número de generaciones configurado.
 
-## Estado actual
+El motor de `engine/Engine.py` calcula las colisiones entre diagonales usando conteo de pares en tiempo lineal respecto al número de reinas. Su función de fitness parte del número máximo de pares posibles y resta las colisiones.
 
-El proyecto es un prototipo en desarrollo. La función `Individual.fitness()` todavía devuelve `0`, por lo que la evaluación real del problema objetivo debe implementarse antes de interpretar los resultados como una solución optimizada. La función `random_Individual_ilegal` se conserva para experimentar con individuos que no son permutaciones válidas.
+## Estado actual y pendientes
+
+El repositorio es un prototipo. La simulación todavía usa una función de prueba en `Individual.fitness()` y no el fitness calculado por `Engine`. Por ello, las salidas actuales no deben interpretarse como soluciones optimizadas para N reinas hasta conectar ambas partes.
+
+También es necesario revisar la firma de `Engine.calculate_cost` antes de invocarla como método de instancia, además de agregar pruebas para validar estados, costos y soluciones sin conflictos diagonales.
 
 ## Autoría y uso de IA
 
-Este README fue elaborado con asistencia de inteligencia artificial (IA) a partir del contenido actual del repositorio. La implementación del proyecto también puede encontrarse en proceso de desarrollo y debe ser revisada y validada por sus autores.
+Este README fue actualizado con asistencia de inteligencia artificial (IA) a partir del contenido actual del repositorio. El código y la documentación forman parte de un trabajo en desarrollo y deben ser revisados, comprendidos y validados por sus autores.
