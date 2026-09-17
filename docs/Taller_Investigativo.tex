@@ -1,0 +1,271 @@
+\documentclass[11pt,a4paper,twocolumn]{article}
+
+% ===================== Paquetes esenciales =====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{fancyhdr}
+\usepackage{ragged2e}
+\usepackage{chessboard}
+\usepackage{float}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing, arrows.meta, positioning}
+\geometry{left=2cm, right=2cm, top=2.5cm, bottom=2.5cm}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt} % la regla la dibujamos nosotros abajo, más gruesa
+
+\begin{document}
+
+\twocolumn[
+    {\centering
+        {\small Pontificia Universidad Javeriana. Taller Investigativo}\\[0.15cm]
+        \rule{\linewidth}{1.2pt}\\[0.6cm]
+
+        {\LARGE \textbf{Aplicación de Algoritmos Genéticos como Estrategia de Búsqueda Global para la Resolución del Problema de las N-Reinas}}\\[0.5cm]
+
+        {\normalsize María José Zabala, Juan Andrés Bravo, David Alejandro Dávila, Arturo Manrique.}\\[0.15cm]
+        {\small \textit{Departamento de Ingeniería de Sistemas, Pontificia Universidad Javeriana}}\\[0.1cm]
+        {\small Bogotá, Colombia}
+    \par}
+
+    \vspace{0.7cm}
+
+    \begin{quote}
+        \noindent\textbf{RESUMEN:} \textit{Aquí se escribe un breve resumen.}
+
+        \vspace{0.2cm}
+        \noindent\textbf{ABSTRACT:} \textit{Lo mismo pero en ingles}
+
+        \vspace{0.2cm}
+        \noindent\textbf{PALABRAS CLAVE:} Algoritmos Genéticos, Búsqueda Global, Problema de las N-Reinas, Optimización Combinatoria.
+    \end{quote}
+
+    \vspace{0.8cm}
+]
+
+
+\section{Introducción}
+El problema de las N-Reinas, consiste en colocar N reinas en un tablero de ajedrez de dimensiones N x N de forma que ninguna de ellas se amenace mutuamente. En el ajedrez convencional, una reina ataca a cualquier pieza que se encuentra en su misma fila, columna o diagonal. 
+Para modelar este problema computacionalmente, se puede emplear una representacion basada en un vector de tamaño N, donde cada indice del vector representa una columna del tablero y el valor almacenado en el representa la fila en la que se ubica la reina. \cite{wiki_nreinas}
+Por ejemplo, para un tablero de 8 reinas, considerese el vector
+\begin{equation*}
+    V_i = [3, 1, 6, 8, 2, 4, 7, 5], \quad \text{donde } i \in \{1, 2, \dots, 8\}
+\end{equation*}
+Siguiendo esta codificacion, en la columna 1 la reina se encuentra en la fila 3, en la columna 2 en la fila 1, y asi sucesivamente. (Ver Figura \ref{fig:tablero_jedrez} para una representacion visual de este vector en un tablero de ajedrez.)
+
+\begin{figure}[H]
+    \centering
+    % Colocamos las reinas según el vector V = [3,1,6,8,2,4,7,5]
+    % (Columna 1=a, 2=b, etc. Fila 1 a 8)
+    \chessboard[
+        setfen=8/8/8/8/8/8/8/8 w - - 0 1, % Tablero vacío inicial
+        pgf=true,
+        addpieces={
+            % a3, b1, c6, d8, e2, f4, g7, h5
+            Qa3, Qb1, Qc6, Qd8, Qe2, Qf4, Qg7, Qh5
+        },
+        showmover=false,
+        maxfield=h8
+    ]
+    \caption{Configuración del tablero para $V = [3, 1, 6, 8, 2, 4, 7, 5]$ usando notación de ajedrez.}
+    \label{fig:tablero_jedrez}
+\end{figure}
+
+Como se puede observar, este vector contiene los numeros del 1 al 8 sin repeticiones, constituyendo una permutación. Gracias a este diseño, se garantiza que no existan conflictos en filas ni columnas, y el problema se reduce a evitar conflictos en las diagonales, donde las diagonales descendientes se identifican por la ecuacion $i - j = k$ y las diagonales ascendentes por $i + j = k$, siendo $i$ y $j$ los indices de fila y columna respectivamente, y $k$ una constante que identifica cada diagonal. \cite{wiki_nreinas}
+
+Para resolver este tipo de problemas de optimizacion, una primera aproximacion tradicional es el uso de algoritmos de búsqueda local. Estas tecnicas operan con un unico estado actual, moviendose iterativamente hacia sus vecinos. Destacan por utilizar muy poca memoria y por ser capaces de encontrar soluciones razonables en espacios grandes donde los algoritmos sistematicos resultan ineficientes.\cite{russell} Sin embargo, presentan limitaciones significativas, como la tendencia a quedar atrapados en óptimos locales y la dificultad de escapar de ellos. \cite{inaoe}
+
+Al escalar el problema de un tablero fijo de 8 posisciones hacia un tamaño general de N-reinas, el espacio de búsqueda crece de manera factorial (N!). Aunque las tecnicas de busqueda local permiten explorar espacios grandes utilizando pocos recursos de memoria, su rendimiento se ve limitado por la presencia de optimos locales, lo que dificulta encontrar soluciones globales. \cite{inaoe}
+Ante la incapacidad de la búsqueda local tradicional para garantizar una exploracion global efectiva en tableros de gran tamaño, cobran relevancia los algoritmos geneticos. Inspirados en la seleccion natural y la evolución biológica, estos algoritmos emplean una población de soluciones candidatas que evolucionan a lo largo del tiempo mediante operadores de selección, cruce y mutación. Esta estrategia permite explorar el espacio de búsqueda de manera más amplia y efectiva, aumentando la probabilidad de encontrar soluciones óptimas o cercanas al óptimo global. \cite{russell} En este trabajo, se implementa y evalua un algoritmo genetico para abordar el problema de las N reinas. 
+
+\section{Conceptos y Fundamentos Teóricos}
+
+Los algoritmos genéticos (AG) son métodos de optimización y búsqueda global inspirados en los principios de la evolución biológica y la selección natural de Charles Darwin \cite{ionos}. 
+
+A diferencia de la búsqueda local tradicional que opera sobre un único estado, un algoritmo genético opera sobre una población de individuos generados de forma aleatoria, donde cada individuo representa una solución candidata al problema. Este enfoque puede verse como una variante avanzada de la búsqueda por haz estocástica, en la cual los nuevos estados sucesores no se generan mediante movimientos aleatorios independientes, sino combinando características de dos estados padres \cite{russell}. 
+Para evaluar soluciones en un algoritmo genetico, se utiliza la funcion de evaluacion o aptitud (\textit{fitness}), que asigna un valor cuantitativo a cada individuo, indicando qué tan buena es la solución que representa. Los individuos con mayor aptitud tienen más probabilidades de ser seleccionados para reproducirse y transmitir sus características a la siguiente generación. \cite{laberintos_ag}
+
+\subsection{Inspiración Biológica}
+Los primeros algoritmos genéticos aparecieron a finales de los años 50 e inicios de los 60, programados por biólogos que buscaban emular el proceso de evolución natural. En 1962, investigadores como G.E.P. Box, G.J. Friedman, W.W. Bledsoe y H.J. Bremermann desarrollaron algoritmos inspirados en la evolución para la optimización de funciones y el aprendizaje automático. Posteriormente, en 1966, L.J. Fogel, A.J. Owens y M.J. Walsh propusieron la programación evolutiva, un enfoque en el cual las posibles soluciones se codificaban mediante máquinas de estado finito sencillas. Su algoritmo funcionaba mutando aleatoriamente una de estas máquinas simuladas y conservando la mejor de las dos. En 1975, se formalizó el concepto de sistemas digitales adaptativos utilizando operaciones de mutación, selección y cruzamiento \cite{sancho}.
+
+\subsection{Representación y Componentes}
+La analogía biológica se estructura de la siguiente manera:
+\begin{itemize}
+    \item \textbf{Cromosoma (Individuo):} Es la codificación de una solución completa. En problemas de optimización combinatoria, existen diversas formas de representar un cromosoma, como codificación binaria, codificación de enteros, codificación de permutaciones y codificación de árboles. En el caso del problema de las N-Reinas, se utiliza una codificación de vectores de permutacion de enteros.
+    \item \textbf{Población:} Conjunto de individuos que representan soluciones candidatas al problema. La diversidad genética dentro de la población es crucial para explorar efectivamente el espacio de búsqueda y evitar la convergencia prematura hacia soluciones subóptimas. En el caso de las N-Reinas, la población inicial se genera aleatoriamente, asegurando que cada individuo sea una permutación válida de los números del 1 al N. 
+    \item \textbf{Genes y Alelos:} Cada posición del cromosoma actúa como un \textit{gen} que especifica una característica individual, mientras que el valor asignado a ese gen se denomina \textit{alelo} (por ejemplo, la fila específica asignada a una columna dada). En la Figura \ref{fig:esquema_nreinas_gen}, se ilustra un ejemplo de cromosoma para el problema de las N-Reinas, donde se resalta un gen específico y su alelo correspondiente.
+    \cite{ionos}
+    
+    \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=1.1, transform shape]
+        % Celdas del vector (Array de 8 columnas)
+        \node[draw, minimum width=0.8cm, minimum height=0.8cm] (c1) at (0,0) {$3$};
+        \node[draw, minimum width=0.8cm, minimum height=0.8cm] (c2) at (0.9,0) {$1$};
+        % Celda resaltada en azul suave (El Gen / Columna 3)
+        \node[draw=blue!60!black, fill=blue!15, very thick, minimum width=0.8cm, minimum height=0.8cm] (c3) at (1.8,0) {\textbf{\textcolor{red!70!black}{6}}}; 
+        \node[draw, minimum width=0.8cm, minimum height=0.8cm] (c4) at (2.7,0) {$8$};
+        \node[draw, minimum width=0.8cm, minimum height=0.8cm] (c5) at (3.6,0) {$2$};
+        \node[draw, minimum width=0.8cm, minimum height=0.8cm] (c6) at (4.5,0) {$4$};
+        \node[draw, minimum width=0.8cm, minimum height=0.8cm] (c7) at (5.4,0) {$7$};
+        \node[draw, minimum width=0.8cm, minimum height=0.8cm] (c8) at (6.3,0) {$5$};
+
+        % Etiquetas de los índices superiores (Número de columna / Gen)
+        \node[above=3pt of c1] {\small 1};
+        \node[above=3pt of c2] {\small 2};
+        \node[above=3pt of c3, text=blue!70!black] {\small \textbf{3}};
+        \node[above=3pt of c4] {\small 4};
+        \node[above=3pt of c5] {\small 5};
+        \node[above=3pt of c6] {\small 6};
+        \node[above=3pt of c7] {\small 7};
+        \node[above=3pt of c8] {\small 8};
+
+        % Llave inferior para todo el Cromosoma
+        \draw [decorate,decoration={brace,amplitude=6pt,mirror,raise=4pt}] 
+            (-0.4,-0.4) -- (6.7,-0.4) 
+            node [midway,below=8pt] {\normalsize \textbf \small{Cromosoma (Vector $V$)}};
+
+        % Llave superior para el Gen (en azul)
+        \draw [decorate, blue!70!black] 
+            (1.4,0.4) -- (2.2,0.4)
+            node [midway,above=12pt, text=blue!70!black] {\normalsize \textbf{Gen}};
+
+        % Flecha y texto del Alelo (en rojo/naranja oscuro para que destaque mucho más)
+        \node (alelo_text) at (1.8,-1.5) {\normalsize \textbf{\textcolor{red!70!black}{Alelo}}};
+
+    \end{tikzpicture}
+    \caption{Representación estructural a color: el contenedor azul resalta el gen (columna) y el numero rojo destaca el alelo (fila) almacenado en su interior.}
+    \label{fig:esquema_nreinas_gen}
+\end{figure}
+\end{itemize}
+
+\subsection{Componentes Clave del Algoritmo}
+El proceso evolutivo se rige por la premisa de la ``supervivencia del más apto'', donde las soluciones compiten por oportunidades de reproducción y transmisión genética \cite{ionos}. Para lograrlo, el algoritmo se compone de tres elementos fundamentales:
+
+\begin{enumerate}
+    \item \textbf{Función de Aptitud (\textit{Fitness}):} Es la métrica cuantitativa que evalúa qué tan adecuada es una solución candidata para resolver el problema. En el contexto de optimización, devuelve valores más altos (o penalizaciones más bajas) para los estados óptimos o más cercanos al objetivo.\cite{russell} 
+    
+    En el caso del problema de las N-Reinas, el cálculo de la función de aptitud se basa en contar el número de intercepciones o conflictos diagonales entre las reinas. Dos reinas situadas en las columnas $i$ y $j$ (con sus respectivas filas $c_i$ y $c_j$) se encuentran bajo amenaza diagonal si cumplen alguna de las siguientes condiciones matemáticas:
+
+\begin{equation*}
+    c_i - i = c_j - j \quad \text{o} \quad c_i + i = c_j + j
+\end{equation*}
+
+Donde $i \neq j$ para evitar comparar una reina consigo misma. De este modo, el algoritmo recorre toda la población evaluando cada cromosoma para determinar su número de errores \cite{programa_tutos_nreinas}.
+
+    \item \textbf{Operadores de Selección:} Mecanismos que eligen a los individuos más aptos de la población actual para que actúen como padres en la siguiente generación, asegurando que los mejores genes tengan mayor probabilidad de heredarse. \cite{ionos} 
+    \item \textbf{Operadores de Recombinación y Mutación:} 
+    \begin{itemize}
+        \item \textit{Cruce (Crossover):} Combina el material genético de dos padres para crear descendientes que heredan las mejores características parciales de ambos. Para problemas basados en permutaciones, como las N-Reinas, donde no puede haber valores repetidos, se emplean técnicas especializadas como el \textbf{Cruce de Orden (\textit{Order Crossover} - OX)}, el cual preserva subsectores de un padre y completa los espacios restantes con los elementos faltantes del otro ordenadamente.\cite{baeldung_ox}
+        \item \textit{Mutación:} Modifica aleatoriamente pequeños fragmentos del cromosoma (por ejemplo, intercambiando dos valores en el vector). Su propósito principal es introducir diversidad genética en la población y evitar el estancamiento prematuro en óptimos locales. \cite{ionos} 
+    \end{itemize}
+\end{enumerate}
+
+\section{Aplicaciones (problema de las N-Reinas)}
+Lo que haga harry y pastuso 
+
+
+\section{ Conclusiones}
+Breve cierre + lo que haga Arturo
+
+\section{Algoritmo y pseudocódigo}
+Se presenta a continuación el pseudocódigo general de un algoritmo genético, seguido de una versión específica adaptada al problema de las N-Reinas.
+\begin{algorithm}[t]
+\caption{Algoritmo genético (Figura 4.17, tomado de \cite{russell}, sin modificaciones)}
+\begin{algorithmic}
+\footnotesize
+\Function{Algoritmo-Genético}{población, Idoneidad} \textbf{Devuelve} un individuo
+    \State \textbf{entradas:} \textit{población}, conjunto de individuos
+    \State \hspace{0.5cm}\textsc{Idoneidad}, mide la capacidad de un individuo
+    \Repeat
+        \State \textit{nueva\_pob} $\gets$ conjunto vacío
+        \For{$i \gets 1$ \textbf{hasta} \textsc{Tamaño}(\textit{población})}
+            \State $x \gets$
+            \Statex \hspace{1.1cm}$\textsc{Selección-Aleatoria}(\textit{población}, \textsc{Idoneidad})$
+            \State $y \gets$
+            \Statex \hspace{1.1cm}$\textsc{Selección-Aleatoria}(\textit{población}, \textsc{Idoneidad})$
+            \State \textit{hijo} $\gets \textsc{Reproducir}(x,y)$
+            \State \textbf{si} probabilidad pequeña \textbf{entonces}
+            \Statex \hspace{0.5cm}$\textit{hijo} \gets \textsc{Mutar}(\textit{hijo})$
+            \State añadir \textit{hijo} a \textit{nueva\_pob}
+        \EndFor
+        \State \textit{población} $\gets$ \textit{nueva\_pob}
+    \Until{algún individuo bastante adecuado, o pasado bastante tiempo}
+    \State \textbf{devolver} mejor individuo según \textsc{Idoneidad}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\vspace{1cm}
+
+\begin{algorithm}[t]
+\caption{Función Reproducir (Figura 4.17, tomado de \cite{russell}, sin modificaciones)}
+\begin{algorithmic}
+\footnotesize
+\Function{Reproducir}{$x,y$} \textbf{Devuelve} un individuo
+    \State \textbf{entradas:} $x,y$, padres individuales
+    \State $n \gets \textsc{Longitud}(x)$
+    \State $c \gets$ número aleatorio de $1$ a $n$
+    \State \textbf{devolver}
+    \Statex \hspace{0.5cm}$\textsc{Añadir}(\textsc{Subcadena}(x,1,c), \textsc{Subcadena}(y,c{+}1,n))$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\vspace{1cm}
+
+\begin{algorithm}[t]
+\caption{ALGORITMO ESPECIFICO PARA EL PROBLEMA DE LAS N-REINAS}
+\begin{algorithmic}
+\footnotesize
+\Function{Reproducir}{$x,y$} \textbf{Devuelve} un individuo
+    \State \textbf{entradas:} $x,y$, padres individuales
+    \State $n \gets \textsc{Longitud}(x)$
+    \State $c \gets$ número aleatorio de $1$ a $n$
+    \State \textbf{devolver}
+    \Statex \hspace{0.5cm}$\textsc{Añadir}(\textsc{Subcadena}(x,1,c), \textsc{Subcadena}(y,c{+}1,n))$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+% ================= Referencias =================
+\begin{thebibliography}{99}
+
+\bibitem{baeldung_ox}
+Baeldung, \emph{Order One Crossover (OX1) in Genetic Algorithms}, Baeldung on Computer Science, [En línea]. Disponible en: \url{https://www.www.baeldung.com/cs/ga-order-one-crossover}. [Accedido: 16 Sep. 2026].
+
+\bibitem{inaoe}
+INAOE, \emph{Algoritmos de Búsqueda Local}, Coordinación de Ciencias Computacionales. Disponible en: \url{https://ccc.inaoep.mx/~emorales/Cursos/Busqueda/node58.html}.
+
+\bibitem{ionos}
+IONOS, \emph{Algoritmos genéticos: definición, funcionamiento y aplicación}, Guía digital IONOS. Disponible en: \url{https://www.ionos.com/es-us/digitalguide/paginas-web/desarrollo-web/algoritmos-geneticos/}.
+
+\bibitem{laberintos_ag}
+Laboratorio de Inteligencia Artificial, \emph{Algoritmos Genéticos}, ITAM. Disponible en: \url{http://laberintos.itam.mx/algoritmos-geneticos/}.
+\bibitem{programa_tutos_nreinas}
+ProgramaTutos, \emph{Problema de la Reinas | Algoritmo Genético | C | Parte 3 : Función de aptitud (Fitness)}, YouTube, 2023. [En línea]. Disponible en: \url{https://www.youtube.com/watch?v=CoXW27xsN0w}. [Accedido: 16 Sep. 2026].
+
+\bibitem{russell}
+S. Russell y P. Norvig, \emph{Inteligencia Artificial: Un Enfoque Moderno}, Prentice Hall, 2004. Disponible en: \url{http://jdelagarza.fime.uanl.mx/IA/Libros/inteligencia-artificial-un-enfoque-moderno-stuart-j-russell.pdf}.
+
+\bibitem{sancho}
+F. Sancho Caparrini, \emph{Algoritmos Genéticos}, Departamento de Ciencias de la Computación e Inteligencia Artificial, Universidad de Sevilla. Disponible en: \url{https://www.cs.us.es/~fsancho/Blog/posts/Algoritmos_Geneticos.md.html}.
+
+\bibitem{wiki_nreinas}
+Wikipedia, \emph{Problema de las ocho reinas}, Disponible en: \url{https://es.wikipedia.org/wiki/Problema_de_las_ocho_reinas}.
+
+\end{thebibliography}
+\end{document}
