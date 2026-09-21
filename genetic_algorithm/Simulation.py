@@ -82,6 +82,11 @@ class Simulation:
             # 2. (Evaluate)
             evaluation = sim.evaluate()
             print(f"{sim.population[0].state} fit: {sim.population[0].fitness()}")
+            if sim.population[0].fitness() == (n*(n-1))//2:
+                print(f"Optimal found in iteration: {i}")
+                break
+
+
             sim.data[f"gen {i}"] = {
                 "population": [i.state.tolist() for i in sim.population],
                 "evaluation" : evaluation 
