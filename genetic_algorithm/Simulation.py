@@ -1,4 +1,4 @@
-from Individual import Individual
+from .Individual import Individual
 import os
 import re
 from pathlib import Path
@@ -40,6 +40,7 @@ class Simulation:
         compact_string = re.sub(r'\],\s*\n\s*\[', '],\n            [', compact_string)
         
         # 4. Save to disk
+        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(compact_string)
 
@@ -125,15 +126,3 @@ class Simulation:
         }
         print(f"{sim.population[0].state}, {sim.population[0].fitness()}")
         sim.save_data("data/data.json")
-
-print("Select the size of the board")
-n = int(input())
-print("Select the size of the population")
-m = int(input())
-print("Select the number of runs")
-runs = int(input())
-print("Select the mutation factor (0->1)")
-mutation_factor = float(input())
-Simulation.run_simulation(n, m, runs, mutation_factor)
-
-

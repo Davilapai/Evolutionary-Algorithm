@@ -1,12 +1,3 @@
-"""
-Gráficas del algoritmo genético para N-Reinas a partir de `data/metrics.json`.
-
-
-Uso:
-    python analysis/plots.py                      # usa data/metrics.json
-    python analysis/plots.py otra/ruta.json figuras/
-"""
-
 import json
 import os
 import sys
@@ -16,8 +7,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from metrics import load_metrics, conflict_positions
+from .metrics import load_metrics, conflict_positions
 
 plt.rcParams.update({
     "figure.dpi": 130,
@@ -34,10 +24,10 @@ C_BEST, C_MEAN, C_WORST = "#1b4965", "#e07a5f", "#9aa0a6"
 
 def _save(fig, outdir, name):
     os.makedirs(outdir, exist_ok=True)
-    for ext in ("png", "pdf"):
-        fig.savefig(os.path.join(outdir, f"{name}.{ext}"), bbox_inches="tight")
+    path = os.path.join(outdir, f"{name}.jpg")
+    fig.savefig(path, format="jpg", bbox_inches="tight", dpi=150)
     plt.close(fig)
-    print(f"  - {name}.pdf / .png")
+    print(f"  - {name}.jpg")
 
 
 def _series(gens, key):

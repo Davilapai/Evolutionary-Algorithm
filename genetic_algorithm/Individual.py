@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-from Engine import Engine 
+from .Engine import Engine
 
 class Individual:
     def __init__(self, state: list[int]):
