@@ -9,12 +9,24 @@
 \usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\floatname{algorithm}{Algoritmo}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicensure{\textbf{Salida:}}
+\algrenewcommand\algorithmicfor{\textbf{para}}
+\algrenewcommand\algorithmicforall{\textbf{para todo}}
+\algrenewcommand\algorithmicwhile{\textbf{mientras}}
+\algrenewcommand\algorithmicif{\textbf{si}}
+\algrenewcommand\algorithmicthen{\textbf{entonces}}
+\algrenewcommand\algorithmicdo{\textbf{hacer}}
+\algrenewcommand\algorithmicend{\textbf{fin}}
+\algrenewcommand\algorithmicreturn{\textbf{devolver}}
 \usepackage{fancyhdr}
 \usepackage{ragged2e}
 \usepackage{chessboard}
 \usepackage{float}
 \usepackage{url}
 \usepackage{hyperref}
+\usepackage[super]{cite}
 \usepackage{tikz}
 \usetikzlibrary{decorations.pathreplacing, arrows.meta, positioning}
 \geometry{left=2cm, right=2cm, top=2.5cm, bottom=2.5cm}
@@ -53,7 +65,7 @@
     \vspace{0.8cm}
 ]
 
-
+% ======== Introduccion ================
 \section{Introducción}
 El problema de las N-Reinas, consiste en colocar N reinas en un tablero de ajedrez de dimensiones N x N de forma que ninguna de ellas se amenace mutuamente. En el ajedrez convencional, una reina ataca a cualquier pieza que se encuentra en su misma fila, columna o diagonal. 
 Para modelar este problema computacionalmente, se puede emplear una representacion basada en un vector de tamaño N, donde cada indice del vector representa una columna del tablero y el valor almacenado en el representa la fila en la que se ubica la reina. \cite{wiki_nreinas}
@@ -88,7 +100,8 @@ Para resolver este tipo de problemas de optimizacion, una primera aproximacion t
 Al escalar el problema de un tablero fijo de 8 posisciones hacia un tamaño general de N-reinas, el espacio de búsqueda crece de manera factorial (N!). Aunque las tecnicas de busqueda local permiten explorar espacios grandes utilizando pocos recursos de memoria, su rendimiento se ve limitado por la presencia de optimos locales, lo que dificulta encontrar soluciones globales. \cite{inaoe}
 Ante la incapacidad de la búsqueda local tradicional para garantizar una exploracion global efectiva en tableros de gran tamaño, cobran relevancia los algoritmos geneticos. Inspirados en la seleccion natural y la evolución biológica, estos algoritmos emplean una población de soluciones candidatas que evolucionan a lo largo del tiempo mediante operadores de selección, cruce y mutación. Esta estrategia permite explorar el espacio de búsqueda de manera más amplia y efectiva, aumentando la probabilidad de encontrar soluciones óptimas o cercanas al óptimo global. \cite{russell} En este trabajo, se implementa y evalua un algoritmo genetico para abordar el problema de las N reinas. 
 
-\section{Conceptos y Fundamentos Teóricos}
+% =========== Conceptos y fundamentos teoricos ============
+\section{Fundamentos Teóricos}
 
 Los algoritmos genéticos (AG) son métodos de optimización y búsqueda global inspirados en los principios de la evolución biológica y la selección natural de Charles Darwin \cite{ionos}. 
 
@@ -166,86 +179,120 @@ Donde $i \neq j$ para evitar comparar una reina consigo misma. De este modo, el 
     \item \textbf{Operadores de Selección:} Mecanismos que eligen a los individuos más aptos de la población actual para que actúen como padres en la siguiente generación, asegurando que los mejores genes tengan mayor probabilidad de heredarse. \cite{ionos} 
     \item \textbf{Operadores de Recombinación y Mutación:} 
     \begin{itemize}
-        \item \textit{Cruce (Crossover):} Combina el material genético de dos padres para crear descendientes que heredan las mejores características parciales de ambos. Para problemas basados en permutaciones, como las N-Reinas, donde no puede haber valores repetidos, se emplean técnicas especializadas como el \textbf{Cruce de Orden (\textit{Order Crossover} - OX)}, el cual preserva subsectores de un padre y completa los espacios restantes con los elementos faltantes del otro ordenadamente.\cite{baeldung_ox}
+        \item \textit{Cruce (Crossover):} Combina el material genético de dos padres para crear descendientes que heredan las mejores características parciales de ambos. Para problemas basados en permutaciones, como las N-Reinas, donde no puede haber valores repetidos, se emplean técnicas especializadas como el \textbf{Cruce Parcialmente Asignado (\textit{Partially Mapped Crossover} - PMX)}, el cual selecciona una subcadena de un progenitor y establece relaciones de correspondencia elemento a elemento para mapear e intercambiar los alelos restantes, garantizando la validez de la permutación sin duplicados \cite{goldberg_lingle_pmx}.
         \item \textit{Mutación:} Modifica aleatoriamente pequeños fragmentos del cromosoma (por ejemplo, intercambiando dos valores en el vector). Su propósito principal es introducir diversidad genética en la población y evitar el estancamiento prematuro en óptimos locales. \cite{ionos} 
     \end{itemize}
 \end{enumerate}
 
+% ========= Algoritmo y pseudocodigo ============
+\section{Algoritmo y pseudocódigo}
+Cada individuo $V=[v_1,\ldots,v_N]$ es una permutación de
+$\{1,\ldots,N\}$. Por tanto, no existen conflictos en filas ni en
+columnas y solo es necesario contar los conflictos diagonales:
+\begin{equation*}
+    C(V)=\sum_{i=1}^{N-1}\sum_{j=i+1}^{N}
+    \mathbf{1}\!\left(|v_i-v_j|=|i-j|\right).
+\end{equation*}
+La función de aptitud se define como
+$f(V)=\binom{N}{2}-C(V)$; una solución es válida cuando $C(V)=0$.
+El Algoritmo~\ref{alg:nreinas} adapta el esquema genético general de
+\cite{russell} mediante selección por torneo, elitismo, cruce PMX y
+mutación por intercambio. Estos dos últimos operadores conservan la
+representación basada en permutaciones.
+
+\begin{algorithm}[H]
+\caption{Algoritmo genético para las N-Reinas}
+\label{alg:nreinas}
+\begin{algorithmic}[1]
+\scriptsize
+\Require $N$, tamaño $\mu$, generaciones $G_{\max}$ y probabilidad $p_m$
+\Ensure Una permutación $V$ con el menor número de conflictos encontrado
+\State $\mathcal{P}\gets \Call{PoblaciónInicial}{\mu,N}$
+\For{$g\gets 1$ \textbf{hasta} $G_{\max}$}
+    \ForAll{$V\in\mathcal{P}$}
+        \State $f(V)\gets \binom{N}{2}-\Call{Conflictos}{V}$
+    \EndFor
+    \If{$\exists V\in\mathcal{P}:\Call{Conflictos}{V}=0$}
+        \State \Return $V$
+    \EndIf
+    \State $V_e\gets\Call{Mejor}{\mathcal{P}}$
+    \State $\mathcal{P}'\gets\emptyset$
+    \While{$|\mathcal{P}'|<\mu$}
+        \State $X\gets\Call{Torneo}{\mathcal{P}}$
+        \State $Y\gets\Call{Torneo}{\mathcal{P}}$
+        \State $H\gets\Call{CrucePMX}{X,Y}$
+        \If{$\Call{Aleatorio}{0,1}<p_m$}
+            \State $H\gets\Call{IntercambiarDosGenes}{H}$
+        \EndIf
+        \State $\mathcal{P}'\gets\mathcal{P}'\cup\{H\}$
+    \EndWhile
+    \State \Call{ReemplazarPeor}{$\mathcal{P}',V_e$}
+    \State $\mathcal{P}\gets\mathcal{P}'$
+\EndFor
+\State \Return $\Call{Mejor}{\mathcal{P}}$
+\end{algorithmic}
+\end{algorithm}
+
+El cruce parcialmente asignado copia en el descendiente una subcadena del
+primer padre y construye una correspondencia entre los alelos de esa
+subcadena y los del mismo intervalo en el segundo padre. Las posiciones
+restantes se completan aplicando dicho mapeo, lo cual evita valores
+duplicados y mantiene una permutación válida \cite{goldberg_lingle_pmx}.
+Su procedimiento se presenta en el Algoritmo~\ref{alg:pmx}.
+
+\begin{algorithm}[H]
+\caption{Cruce parcialmente asignado (PMX)}
+\label{alg:pmx}
+\begin{algorithmic}[1]
+\scriptsize
+\Require Padres $X$ y $Y$, ambos permutaciones de longitud $N$
+\Ensure Un descendiente $H$ que también es una permutación
+\State Elegir al azar $a,b$ tales que $1\leq a<b\leq N$
+\State Inicializar $H$ con $N$ posiciones vacías
+\State $H[a\ldots b]\gets X[a\ldots b]$
+\For{$i\gets 1$ \textbf{hasta} $N$}
+    \If{$i<a$ o $i>b$}
+        \State $y\gets Y[i]$
+        \While{$y\in X[a\ldots b]$}
+            \State $j\gets\Call{Posición}{X,y}$
+            \State $y\gets Y[j]$
+        \EndWhile
+        \State $H[i]\gets y$
+    \EndIf
+\EndFor
+\State \Return $H$
+\end{algorithmic}
+\end{algorithm}
+
 \section{Aplicaciones (problema de las N-Reinas)}
 Lo que haga harry y pastuso 
+\subsection{Implemetacion}
+\subsection{Resultados y Hallazgos}
 
+Para evaluar la escalabilidad del algoritmo genético ante el crecimiento factorial del espacio de búsqueda ($N!$), se contrastaron 1\,140 experimentos multidimensionales ($N \in [8, 64]$) frente a un estudio de caso en escala masiva ($N=100$). Los resultados evidencian que el tamaño del tablero condiciona radicalmente la dinámica de convergencia, la sensibilidad de los hiperparámetros y la velocidad de resolución.
 
-\section{ Conclusiones}
+En primer lugar, la dificultad del problema se segmenta en tres categorías operativas: en tableros pequeños ($N \le 20$), el algoritmo exhibe alta robustez con una tasa de éxito global del 81.5\,\% y una mediana de convergencia en apenas 12 generaciones. En tableros medianos ($21 \le N \le 40$), la tasa de éxito general se reduce al 27.5\,\% (mediana de 74 épocas), mientras que en tableros grandes ($41 \le N \le 64$) desciende al 12.9\,\% (mediana de 173 épocas). No obstante, esta disminución no refleja una incapacidad intrínseca del algoritmo: al calibrar la tasa de mutación en su franja óptima ($p_m^*$), se logró un 100\,\% de convergencia a cero colisiones en los 57 tamaños de tablero evaluados, extendiéndose exitosamente hasta $N=100$ ($100! \approx 9.33 \times 10^{157}$) en 4\,732 generaciones mediante el refuerzo poblacional ($m=300$).
+
+En segundo lugar, el análisis topográfico bidimensional ($N$ vs $p_m$, Figura~\ref{fig:heatmap_convergencia}) revela que el incremento de $N$ comprime severamente el corredor de mutación viable. Mientras que en tableros pequeños cualquier mutación entre 0.01 y 0.20 permite converger, para $N \ge 41$ las tasas superiores a 0.04 destruyen los bloques constructivos del cruce PMX, provocando un colapso del éxito al 0\,\%. A partir de este fenómeno se formuló la \textit{Ley de Invarianza de la Perturbación Genómica}: para preservar la estabilidad del cromosoma, el número esperado de intercambios debe conservarse constante en torno a una mediana de $\mathbb{E}[\text{swaps}] = N \times p_m^*(N) \approx 0.62$, deduciendo la regla de escalabilidad $p_m^*(N) \approx 0.6 / N$.
+
+Finalmente, la dinámica temporal confirma un comportamiento bifásico universal invariante a la escala: una fase macroscópica inicial donde el cruce PMX reduce más del 80\,\% de las colisiones en las primeras decenas de generaciones, sucedida por una meseta asintótica donde la mutación puntual bajo elitismo resuelve los últimos conflictos diagonales.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/heatmap_8_a_64.png}
+    \caption{Mapa de calor bidimensional de convergencia ($N$ vs $p_m$) ilustrando la compresión del corredor óptimo en tableros grandes.}
+    \label{fig:heatmap_convergencia}
+\end{figure}
+
+\section{Conclusiones}
 Breve cierre + lo que haga Arturo
-
-\section{Algoritmo y pseudocódigo}
-Se presenta a continuación el pseudocódigo general de un algoritmo genético, seguido de una versión específica adaptada al problema de las N-Reinas.
-\begin{algorithm}[t]
-\caption{Algoritmo genético (Figura 4.17, tomado de \cite{russell}, sin modificaciones)}
-\begin{algorithmic}
-\footnotesize
-\Function{Algoritmo-Genético}{población, Idoneidad} \textbf{Devuelve} un individuo
-    \State \textbf{entradas:} \textit{población}, conjunto de individuos
-    \State \hspace{0.5cm}\textsc{Idoneidad}, mide la capacidad de un individuo
-    \Repeat
-        \State \textit{nueva\_pob} $\gets$ conjunto vacío
-        \For{$i \gets 1$ \textbf{hasta} \textsc{Tamaño}(\textit{población})}
-            \State $x \gets$
-            \Statex \hspace{1.1cm}$\textsc{Selección-Aleatoria}(\textit{población}, \textsc{Idoneidad})$
-            \State $y \gets$
-            \Statex \hspace{1.1cm}$\textsc{Selección-Aleatoria}(\textit{población}, \textsc{Idoneidad})$
-            \State \textit{hijo} $\gets \textsc{Reproducir}(x,y)$
-            \State \textbf{si} probabilidad pequeña \textbf{entonces}
-            \Statex \hspace{0.5cm}$\textit{hijo} \gets \textsc{Mutar}(\textit{hijo})$
-            \State añadir \textit{hijo} a \textit{nueva\_pob}
-        \EndFor
-        \State \textit{población} $\gets$ \textit{nueva\_pob}
-    \Until{algún individuo bastante adecuado, o pasado bastante tiempo}
-    \State \textbf{devolver} mejor individuo según \textsc{Idoneidad}
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
-
-\vspace{1cm}
-
-\begin{algorithm}[t]
-\caption{Función Reproducir (Figura 4.17, tomado de \cite{russell}, sin modificaciones)}
-\begin{algorithmic}
-\footnotesize
-\Function{Reproducir}{$x,y$} \textbf{Devuelve} un individuo
-    \State \textbf{entradas:} $x,y$, padres individuales
-    \State $n \gets \textsc{Longitud}(x)$
-    \State $c \gets$ número aleatorio de $1$ a $n$
-    \State \textbf{devolver}
-    \Statex \hspace{0.5cm}$\textsc{Añadir}(\textsc{Subcadena}(x,1,c), \textsc{Subcadena}(y,c{+}1,n))$
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
-
-\vspace{1cm}
-
-\begin{algorithm}[t]
-\caption{ALGORITMO ESPECIFICO PARA EL PROBLEMA DE LAS N-REINAS}
-\begin{algorithmic}
-\footnotesize
-\Function{Reproducir}{$x,y$} \textbf{Devuelve} un individuo
-    \State \textbf{entradas:} $x,y$, padres individuales
-    \State $n \gets \textsc{Longitud}(x)$
-    \State $c \gets$ número aleatorio de $1$ a $n$
-    \State \textbf{devolver}
-    \Statex \hspace{0.5cm}$\textsc{Añadir}(\textsc{Subcadena}(x,1,c), \textsc{Subcadena}(y,c{+}1,n))$
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
-
-
 
 
 % ================= Referencias =================
 \begin{thebibliography}{99}
 
-\bibitem{baeldung_ox}
-Baeldung, \emph{Order One Crossover (OX1) in Genetic Algorithms}, Baeldung on Computer Science, [En línea]. Disponible en: \url{https://www.www.baeldung.com/cs/ga-order-one-crossover}. [Accedido: 16 Sep. 2026].
+\bibitem{goldberg_lingle_pmx}
+D.~E. Goldberg y R.~Lingle, ``Alleles, loci, and the traveling salesman problem'', en \emph{Proceedings of the 1st International Conference on Genetic Algorithms and Their Applications}, J.~J. Grefenstette, Ed. Lawrence Erlbaum Associates, 1985, pp.~154--159.
 
 \bibitem{inaoe}
 INAOE, \emph{Algoritmos de Búsqueda Local}, Coordinación de Ciencias Computacionales. Disponible en: \url{https://ccc.inaoep.mx/~emorales/Cursos/Busqueda/node58.html}.
@@ -268,4 +315,5 @@ F. Sancho Caparrini, \emph{Algoritmos Genéticos}, Departamento de Ciencias de l
 Wikipedia, \emph{Problema de las ocho reinas}, Disponible en: \url{https://es.wikipedia.org/wiki/Problema_de_las_ocho_reinas}.
 
 \end{thebibliography}
+
 \end{document}
