@@ -5,6 +5,7 @@ import sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 import numpy as np
 
 from .metrics import load_metrics, conflict_positions
@@ -121,24 +122,73 @@ def fig_tablero(data, outdir):
     rows = np.array(state)
     ok = np.array([c not in malas for c in cols])
 
-    fig, ax = plt.subplots(figsize=(5.6, 5.6))
-    if n <= 40:
-        ax.set_xticks(np.arange(n + 1) - 0.5, minor=True)
-        ax.set_yticks(np.arange(n + 1) - 0.5, minor=True)
-        ax.grid(which="minor", color="#dddddd", lw=0.6)
-    s = max(4, 1200 / n)
-    ax.scatter(cols[ok], rows[ok], s=s, color=C_BEST, label="Sin conflicto")
+    fig, ax = plt.subplots(figsize=(6, 6))
+
+    # 1. Fondo de casillas alternadas (estilo ajedrez clásico o madera suave)
+    # Matriz donde cada celda alterna entre 0 y 1
+    board = (np.indices((n, n)).sum(axis=0) % 2)
+    
+    # Colores suaves para que no compitan con los puntos de las reinas
+    # Casilla clara / Casilla oscura (puedes ajustar a tonos madera o gris)
+    cmap_board = ListedColormap(["#f0d9b5", "#b58863"])
+    
+    # extent alinea las celdas exactamente con las coordenadas de scatter
+    ax.imshow(
+        board,
+        cmap=cmap_board,
+        origin="lower",
+        extent=(-0.5, n - 0.5, -0.5, n - 0.5),
+        zorder=0
+    )
+
+    # 2. Dibujar una reina en cada posición del mejor individuo.
+    # Reducir el símbolo proporcionalmente para que quepa dentro de una casilla.
+    queen_size = max(4, min(18, 320 / n))
+    for col, row, is_ok in zip(cols, rows, ok):
+        color = C_BEST if is_ok else "#c1121f"
+        ax.text(
+            col,
+            row,
+            "♛",
+            ha="center",
+            va="center",
+            fontsize=queen_size,
+            color=color,
+            fontweight="bold",
+            zorder=3,
+        )
+
+    # Entradas proxy para conservar una leyenda clara al usar texto como marcador.
+    ax.scatter([], [], s=70, color=C_BEST, label="Reina sin conflicto")
     if (~ok).any():
-        ax.scatter(cols[~ok], rows[~ok], s=s, color="#c1121f", marker="X",
-                   label="En conflicto diagonal")
+        ax.scatter([], [], s=70, color="#c1121f", label="Reina en conflicto diagonal")
+
+    # 3. Ticks y etiquetas (opcional: notación de ajedrez a-h / 1-8 si n <= 8)
+    if n <= 16:
+        ax.set_xticks(np.arange(n))
+        ax.set_yticks(np.arange(n))
+        if n == 8:
+            # Letras para columnas y 1-8 para filas
+            ax.set_xticklabels([chr(ord('a') + i) for i in range(n)])
+            ax.set_yticklabels(range(1, n + 1))
+    else:
+        # Para n grande, saltos razonables para no saturar
+        step = max(1, n // 10)
+        ax.set_xticks(np.arange(0, n, step))
+        ax.set_yticks(np.arange(0, n, step))
+
     ax.set_xlim(-0.5, n - 0.5)
     ax.set_ylim(-0.5, n - 0.5)
     ax.set_aspect("equal")
     ax.set_xlabel("Columna")
     ax.set_ylabel("Fila")
-    ax.set_title(f"Mejor solución (gen {data['best_individual']['generation']}), "
-                 f"{data['best_individual']['conflicts']} conflictos")
-    ax.legend(loc="upper right", frameon=True, fontsize=8)
+    ax.set_title(
+        f"Mejor solución (n={n}, población={data['config']['m']}, "
+        f"gen {data['best_individual']['generation']}), "
+        f"{data['best_individual']['conflicts']} conflictos"
+    )
+    ax.legend(loc="upper right", bbox_to_anchor=(1.0, 1.12), frameon=True, fontsize=8)
+
     _save(fig, outdir, "fig5_tablero")
 
 
@@ -190,61 +240,6 @@ def tabla_resumen(data, outdir):
         f.write("\\hline\n\\end{tabular}\n\\end{table}\n")
     print(f"  - tabla_resumen.tex")
     return ruta
-
-
-def cargar_escalabilidad(path="data/scalability.json"):
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
-
-
-def fig_escalabilidad(data, outdir):
-    """
-    Cómo cambian el tiempo total, las evaluaciones y la velocidad de
-    convergencia al crecer n (tamaño del tablero), con m y mutación fijos.
-
-    El tiempo absoluto depende de la máquina donde se corra; lo que sí es
-    comparable entre máquinas es la FORMA de la curva (si crece lineal,
-    cuadrático, etc.) y cuántas generaciones hacen falta para converger.
-    """
-    res = sorted(data["resultados"], key=lambda r: r["n"])
-    n = np.array([r["n"] for r in res], dtype=float)
-    tiempo = np.array([r["tiempo_total_s"] for r in res], dtype=float)
-    evals = np.array([r["evaluaciones_totales"] for r in res], dtype=float)
-    gen_mejor = np.array([r["generacion_del_mejor"] if r["generacion_del_mejor"] is not None
-                          else np.nan for r in res], dtype=float)
-    optimo = [r["optimo_encontrado"] for r in res]
-
-    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(12, 3.6))
-
-    a1.plot(n, tiempo, "o-", color=C_BEST)
-    a1.set_xlabel("n (tamaño del tablero)")
-    a1.set_ylabel("Tiempo total (s)")
-    a1.set_title("Tiempo total")
-
-    a2.plot(n, evals, "o-", color=C_MEAN)
-    a2.set_xlabel("n (tamaño del tablero)")
-    a2.set_ylabel("Evaluaciones totales")
-    a2.set_title("Costo computacional")
-
-    colors = [C_BEST if o else C_WORST for o in optimo]
-    a3.scatter(n, gen_mejor, c=colors)
-    a3.plot(n, gen_mejor, "-", color=C_MEAN, lw=1, alpha=0.5, zorder=0)
-    a3.set_xlabel("n (tamaño del tablero)")
-    a3.set_ylabel("Generación del mejor")
-    a3.set_title("Velocidad de convergencia")
-
-    m = data["m"]
-    fig.suptitle(f"Escalabilidad con n (m={m}, mutación={data['mutation_factor']})",
-                y=1.05)
-    _save(fig, outdir, "fig7_escalabilidad")
-
-
-def generar_escalabilidad(scalability_path="data/scalability.json", outdir="figures"):
-    data = cargar_escalabilidad(scalability_path)
-    print(f"Generando figura de escalabilidad en {outdir}/")
-    fig_escalabilidad(data, outdir)
-    return outdir
-
 
 def generar_todo(metrics_path="data/metrics.json", outdir="figures"):
     data = load_metrics(metrics_path)

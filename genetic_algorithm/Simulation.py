@@ -1,4 +1,5 @@
 from .Individual import Individual
+from analysis.metrics import Recorder
 import os
 import re
 from pathlib import Path
@@ -18,8 +19,9 @@ class Simulation:
 
     def evaluate(self):
         fitness = [individual.fitness() for individual in self.population]
-        self.population = self.population[np.argsort(fitness)[::-1]]
-        return fitness
+        order = np.argsort(fitness)[::-1]
+        self.population = self.population[order]
+        return [fitness[i] for i in order]
  
     def select_parents(self):
         parents = []
@@ -77,11 +79,14 @@ class Simulation:
         
         # 1. (Initialize)
         sim = Simulation(n, m)
+        recorder = Recorder(n, m, runs, mutation_factor)
 
         for i in range(runs):
 
             # 2. (Evaluate)
             evaluation = sim.evaluate()
+            states = np.array([individual.state for individual in sim.population])
+            recorder.record(i, states, evaluation)
             print(f"{sim.population[0].state} fit: {sim.population[0].fitness()}")
             if sim.population[0].fitness() == (n*(n-1))//2:
                 print(f"Optimal found in iteration: {i}")
@@ -126,3 +131,4 @@ class Simulation:
         }
         print(f"{sim.population[0].state}, {sim.population[0].fitness()}")
         sim.save_data("data/data.json")
+        recorder.save("data/metrics.json")

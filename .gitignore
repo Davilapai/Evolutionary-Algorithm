@@ -4,3 +4,4 @@ data
 temp.py
 *.csv
 *.pyc
+/temp
