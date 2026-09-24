@@ -293,8 +293,14 @@ Finalmente, la dinámica temporal confirma un comportamiento bifásico universal
 \end{figure}
 
 \section{Conclusiones}
-Breve cierre + lo que haga Arturo
 
+Los resultados obtenidos confirman la hipótesis planteada en la introducción: frente al crecimiento factorial del espacio de búsqueda del problema de las N-Reinas, un algoritmo genético con representación de permutación, cruce PMX y elitismo logra sostener una capacidad de exploración global que las técnicas de búsqueda local tradicionales no pueden garantizar. La restricción del espacio de $N^N$ a $N!$ mediante la codificación por permutación, junto con el cálculo de aptitud en $O(N)$, resultó determinante para que la búsqueda fuera computacionalmente viable incluso en instancias grandes.
+
+La evidencia experimental muestra, sin embargo, que esta capacidad de exploración no es uniforme: a medida que $N$ crece, el algoritmo con parámetros fijos ve reducida su tasa de éxito (de 81.5\% en tableros pequeños a 12.9\% en tableros grandes), lo que en un análisis superficial podría interpretarse como una limitación estructural del método. El hallazgo más relevante de este trabajo es que dicha caída no refleja una debilidad del algoritmo genético en sí, sino una mala calibración de la tasa de mutación frente a la escala del problema. Al ajustar $p_m$ según la regla de escalabilidad derivada empíricamente ($p_m^*(N) \approx 0.6/N$), se alcanzó un 100\% de convergencia en los 57 tamaños de tablero evaluados, e incluso se resolvió exitosamente el caso $N=100$, un espacio de búsqueda de aproximadamente $9.33 \times 10^{157}$ permutaciones. Esto evidencia que, para algoritmos genéticos con codificación de permutación, la tasa de mutación no debe tratarse como un hiperparámetro fijo, sino como una función decreciente del tamaño del cromosoma que preserva constante el número esperado de intercambios por individuo.
+
+El comportamiento bifásico observado en la convergencia —una fase inicial rápida dominada por el cruce PMX, seguida de una fase asintótica donde la mutación puntual bajo elitismo resuelve los conflictos residuales— es consistente con el rol complementario que la teoría asigna a ambos operadores: el cruce explora combinando bloques constructivos ya buenos, mientras que la mutación introduce la diversidad necesaria para escapar de los últimos óptimos locales sin degradar el resto del cromosoma.
+
+Como trabajo futuro, sería valioso extender el análisis a esquemas de mutación adaptativa que ajusten $p_m$ dinámicamente durante la ejecución en lugar de fijarla a priori, así como evaluar otros operadores de cruce orientados a permutaciones (por ejemplo, OX o CX) para contrastar su efecto sobre la \textit{Ley de Invarianza de la Perturbación Genómica} propuesta. Asimismo, resultaría interesante estudiar la escalabilidad del algoritmo más allá de $N=100$, así como el efecto de mecanismos de diversidad poblacional (como el reinicio parcial o la migración entre subpoblaciones) para reducir aún más el número de generaciones requeridas en tableros de gran tamaño.
 
 % ================= Referencias =================
 \begin{thebibliography}{99}
