@@ -29,6 +29,8 @@
 \usepackage{hyperref}
 \usepackage[super]{cite}
 \usepackage{tikz}
+\usepackage{xurl}
+\usepackage{hyperref} 
 \usetikzlibrary{decorations.pathreplacing, arrows.meta, positioning}
 \geometry{left=2cm, right=2cm, top=2.5cm, bottom=2.5cm}
 
@@ -275,16 +277,12 @@ El operador de mutación utilizado intercambia alelos aleatoriamente con una pro
 
 \subsection{Resultados y Hallazgos}
 
-La exploración experimental multidimensional del algoritmo genético (cruce PMX, mutación por intercambio y elitismo) sobre el problema de las N-Reinas revela que la dinámica de convergencia está gobernada por el acoplamiento no lineal entre la dimensión del tablero ($N$) y el tamaño de la población ($M$). Para caracterizar este comportamiento ante el crecimiento factorial del espacio de búsqueda ($N!$), se contrastaron 1\,140 experimentos multidimensionales ($N \in [8, 64]$) frente a un estudio de caso en escala masiva ($N=100$, $M=300$), junto con una exploración sistemática de la variación del tamaño de la población ($M \in [20, 500]$ para $N=25$).
+La exploración experimental multidimensional del algoritmo genético sobre el problema de las N-Reinas revela que la dinámica de convergencia está gobernada por el acoplamiento no lineal entre la dimensión del tablero ($N$) y el tamaño de la población ($M$). Para caracterizar este comportamiento ante el crecimiento factorial del espacio de búsqueda ($N!$), se realizaron varios experimentos multidimensionales ($N \in [8, 100]$) junto con una exploración sistemática de la variación del tamaño de la población ($M \in [20, 500]$ para $N=25$).
 
 \paragraph{Dinámica por dimensión del tablero ($N \in [8, 100]$).}
-Ante la variación del tamaño del tablero, el crecimiento factorial del espacio de búsqueda comprime drásticamente el espacio de parámetros viables. En tableros pequeños ($N \le 20$), el algoritmo exhibe alta tolerancia estocástica, logrando una tasa de éxito global del 81.5\,\% con una mediana de convergencia en apenas 12 generaciones. Al escalar hacia tableros medianos ($21 \le N \le 40$), la tasa de éxito general se reduce al 27.5\,\% (mediana de 74 épocas), y en tableros grandes ($41 \le N \le 64$) desciende al 12.9\,\% (mediana de 173 épocas). Conforme $N$ escala hacia tableros grandes ($N > 40$), la tasa de éxito colapsa al 0\,\% para tasas de mutación $p_m > 0.04$, debido a que múltiples intercambios simultáneos (\textit{swaps}) desarticulan los bloques constructivos preservados por el cruce PMX.
+Ante la variación del tamaño del tablero, el crecimiento factorial del espacio de búsqueda comprime drásticamente el espacio de parámetros viables. En tableros pequeños ($N \le 20$), el algoritmo exhibe alta tolerancia estocástica, logrando una tasa de éxito global del 81.5\,\% con una mediana de convergencia en apenas 12 generaciones. Al escalar hacia tableros medianos ($21 \le N \le 40$), la tasa de éxito general se reduce al 27.5\,\% (mediana de 74 épocas), y en tableros grandes ($41 \le N$) desciende al 12.9\,\% (mediana de 173 épocas). Conforme $N$ escala hacia tableros grandes ($N > 40$), la tasa de éxito colapsa al 0\,\% para tasas de mutación $p_m > 0.04$, debido a que múltiples intercambios simultáneos (\textit{swaps}) desarticulan los bloques constructivos preservados por el cruce PMX.
 
-No obstante, al calibrar la tasa de mutación en su franja óptima ($p_m^*$), el algoritmo resolvió el 100\,\% de los 57 tableros evaluados, alcanzando cero colisiones incluso en $N=100$ ($100! \approx 9.33 \times 10^{157}$) en 4\,732 generaciones mediante el refuerzo poblacional ($M=300$). De esta dinámica emerge la \textbf{Ley de Invarianza de Perturbación Genómica}: el producto esperado de intercambios por individuo permanece cuasi-constante en torno a $\mathbb{E}[\text{swaps}] = N \times p_m^*(N) \approx 0.62$, de donde se deduce la regla de escalabilidad hiperbólica:
-\begin{equation}
-    p_m^*(N) \approx \frac{0.6}{N}
-    \label{eq:ley_perturbacion}
-\end{equation}
+No obstante, al calibrar la tasa de mutación en su franja óptima ($p_m^*$), el algoritmo resolvió el 100\,\% de los tableros evaluados, alcanzando cero colisiones incluso en $N=100$ ($100! \approx 9.33 \times 10^{157}$) en 4\,732 generaciones mediante el refuerzo poblacional ($M=300$). 
 
 Como se ilustra en el mapa de calor de la Figura~\ref{fig:heatmap_convergencia}, el corredor de mutación viable sufre una compresión hiperbólica a medida que $N$ crece, conllevando al colapso de convergencia ante hiperparámetros no calibrados frente al crecimiento factorial $N!$.
 
@@ -295,11 +293,23 @@ Como se ilustra en el mapa de calor de la Figura~\ref{fig:heatmap_convergencia},
     \label{fig:heatmap_convergencia}
 \end{figure}
 
+\paragraph{Dinámica por tamaño de la población ($M \in [20, 500]$ para $N=25$).}
+La evaluación del tamaño de la población evidencia la existencia de un \textbf{umbral crítico de diversidad alélica en $M \approx 60$}: poblaciones menores sufren estancamiento en óptimos locales (de 1 a 2 colisiones residuales) a causa de una deriva génica prematura.
+
+Por encima de este umbral y con la mutación calibrada en su franja óptima ($p_m \approx 0.022$), la tasa de éxito alcanza el 95.9\,\%. Sin embargo, incrementar $M$ más allá de 200 individuos apenas reduce las generaciones necesarias para encontrar la solución, pero incrementa linealmente el tiempo de cómputo en CPU por generación (Figura~\ref{fig:poblacion_exito_tiempo}). En consecuencia, se sitúa el \textbf{compromiso óptimo de eficiencia computacional en el rango $M \in [100, 200]$}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{poblacion_vs_exito_tiempo.png}
+    \caption{Dinámica por tamaño de la población ($M \in [20, 500]$ para $N=25$): (izquierda) umbral crítico de viabilidad alélica en $M \approx 60$; (derecha) compromiso de eficiencia computacional entre tiempo de CPU y generaciones de convergencia.}
+    \label{fig:poblacion_exito_tiempo}
+\end{figure}
+
 \section{Conclusiones}
 
 Los resultados obtenidos confirman la hipótesis planteada en la introducción: frente al crecimiento factorial del espacio de búsqueda del problema de las N-Reinas, un algoritmo genético con representación de permutación, cruce PMX y elitismo logra sostener una capacidad de exploración global que las técnicas de búsqueda local tradicionales no pueden garantizar. La restricción del espacio de $N^N$ a $N!$ mediante la codificación por permutación, junto con el cálculo de aptitud en $O(N)$, resultó determinante para que la búsqueda fuera computacionalmente viable incluso en instancias grandes.
 
-La evidencia experimental muestra, sin emba\textsl{}rgo, que esta capacidad de exploración no es uniforme: a medida que $N$ crece, el algoritmo con parámetros fijos ve reducida su tasa de éxito (de 81.5\% en tableros pequeños a 12.9\% en tableros grandes), lo que en un análisis superficial podría interpretarse como una limitación estructural del método. El hallazgo más relevante de este trabajo es que dicha caída no refleja una debilidad del algoritmo genético en sí, sino una mala calibración de la tasa de mutación y tamaño de la población frente a la escala del problema. Al ajustar adecuadamente ambos parámetros, se resolvió exitosamente el caso $N=100$, un espacio de búsqueda de aproximadamente $9.33 \times 10^{157}$ permutaciones. Esto evidencia que, con un buen balance de los parametros, el algoritmo sostiene su capacidad de resolucion de problemas de tamaño factorial. 
+La evidencia experimental muestra, sin embargo, que esta capacidad de exploración no es uniforme: a medida que $N$ crece, el algoritmo con parámetros fijos ve reducida su tasa de éxito (de 81.5\% en tableros pequeños a 12.9\% en tableros grandes), lo que en un análisis superficial podría interpretarse como una limitación estructural del método. El hallazgo más relevante de este trabajo es que dicha caída no refleja una debilidad del algoritmo genético en sí, sino una mala calibración de la tasa de mutación y tamaño de la población frente a la escala del problema. Al ajustar adecuadamente ambos parámetros, se resolvió exitosamente el caso $N=100$, un espacio de búsqueda de aproximadamente $9.33 \times 10^{157}$ permutaciones. Esto evidencia que, con un buen balance de los parametros, el algoritmo sostiene su capacidad de resolucion de problemas de tamaño factorial. 
 
 % ================= Referencias =================
 \begin{thebibliography}{99}
