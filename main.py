@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from genetic_algorithm.Simulation import Simulation
-from analysis.plots import generar_todo
+#from analysis.plots import generar_todo
 
 ROOT = Path(__file__).resolve().parent
 METRICS_PATH = ROOT / "data" / "metrics.json"
@@ -14,7 +14,7 @@ def main():
     mutation_factor = float(input("Select the mutation factor (0->1): "))
     
     Simulation.run_simulation(n, m, runs, mutation_factor)
-    generar_todo(str(METRICS_PATH), str(FIGURES_PATH))
+    #generar_todo(str(METRICS_PATH), str(FIGURES_PATH))
 
 if __name__ == "__main__":
     main()

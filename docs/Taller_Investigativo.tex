@@ -53,13 +53,13 @@
     \vspace{0.7cm}
 
     \begin{quote}
-        \noindent\textbf{RESUMEN:} \textit{Aquí se escribe un breve resumen.}
+        \noindent\textbf{RESUMEN:} \textit{Este trabajo aborda el problema de las N-Reinas mediante un algoritmo genético. Utilizando vectores de permutación, una función de aptitud basada en colisiones y herramientas estocásticas para la diversificación, el modelo optimiza la búsqueda en espacios factoriales. Los resultados demuestran que un adecuado balance de población e iteraciones garantiza una alta eficiencia computacional.}
 
         \vspace{0.2cm}
-        \noindent\textbf{ABSTRACT:} \textit{Lo mismo pero en inglés}
+        \noindent\textbf{ABSTRACT:} \textit{This paper addresses the N-Queens problem using a genetic algorithm. Employing permutation vectors, a collision-based fitness function, and stochastic tools for diversification, the model optimizes search spaces. Results show that an optimal balance between population size and iterations ensures high computational efficiency.}
 
         \vspace{0.2cm}
-        \noindent\textbf{PALABRAS CLAVE:} Algoritmos Genéticos, Búsqueda Global, Problema de las N-Reinas, Optimización Combinatoria.
+        \noindent\textbf{PALABRAS CLAVE:} Algoritmo genético, balance poblacional, cruce PMX, mutación, optimización combinatoria, problema de las N-Reinas. 
     \end{quote}
 
     \vspace{0.8cm}
@@ -103,13 +103,10 @@ Ante la incapacidad de la búsqueda local tradicional para garantizar una explor
 % =========== Conceptos y fundamentos teoricos ============
 \section{Fundamentos Teóricos}
 
-Los algoritmos genéticos (AG) son métodos de optimización y búsqueda global inspirados en los principios de la evolución biológica y la selección natural de Charles Darwin \cite{ionos}. 
-
-A diferencia de la búsqueda local tradicional que opera sobre un único estado, un algoritmo genético opera sobre una población de individuos generados de forma aleatoria, donde cada individuo representa una solución candidata al problema. Este enfoque puede verse como una variante avanzada de la búsqueda por haz estocástica, en la cual los nuevos estados sucesores no se generan mediante movimientos aleatorios independientes, sino combinando características de dos estados padres \cite{russell}. 
-Para evaluar soluciones en un algoritmo genético, se utiliza la función de evaluación o aptitud (\textit{fitness}), que asigna un valor cuantitativo a cada individuo, indicando qué tan buena es la solución que representa. Los individuos con mayor aptitud tienen más probabilidades de ser seleccionados para reproducirse y transmitir sus características a la siguiente generación. \cite{laberintos_ag}
+Los algoritmos genéticos (AG) son métodos de optimización global inspirados en la evolución biológica y la selección natural. A diferencia de la búsqueda local tradicional, un AG opera de forma simultánea sobre una población de soluciones candidatas y se asemeja a una variante de la búsqueda por haz estocástica, donde los nuevos estados se generan combinando características de dos padres. La calidad de cada solución se mide mediante una función de aptitud (\textit{fitness}), priorizando a los individuos más aptos para la reproducción.
 
 \subsection{Inspiración Biológica}
-Los primeros algoritmos genéticos aparecieron a finales de los años 50 e inicios de los 60, programados por biólogos que buscaban emular el proceso de evolución natural. En 1962, investigadores como G.E.P. Box, G.J. Friedman, W.W. Bledsoe y H.J. Bremermann desarrollaron algoritmos inspirados en la evolución para la optimización de funciones y el aprendizaje automático. Posteriormente, en 1966, L.J. Fogel, A.J. Owens y M.J. Walsh propusieron la programación evolutiva, un enfoque en el cual las posibles soluciones se codificaban mediante máquinas de estado finito sencillas. Su algoritmo funcionaba mutando aleatoriamente una de estas máquinas simuladas y conservando la mejor de las dos. En 1975, se formalizó el concepto de sistemas digitales adaptativos utilizando operaciones de mutación, selección y cruzamiento \cite{sancho}.
+Los fundamentos de la computación evolutiva se consolidaron entre las décadas de 1950 y 1970. En los años 60, investigadores como Box, Friedman, Bledsoe y Bremermann implementaron las primeras simulaciones evolutivas para optimización, seguidas por la programación evolutiva de Fogel, Owens y Walsh en 1966 basada en máquinas de estado finito. Hacia 1975, se formalizaron los sistemas adaptativos digitales mediante operadores estandarizados de selección, cruce y mutación.
 
 \subsection{Representación y Componentes}
 La analogía biológica se estructura de la siguiente manera:
