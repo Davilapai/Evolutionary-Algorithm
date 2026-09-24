@@ -9,7 +9,6 @@
 \usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\floatname{algorithm}{Algoritmo}
 \algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
 \algrenewcommand\algorithmicensure{\textbf{Salida:}}
 \algrenewcommand\algorithmicfor{\textbf{para}}
@@ -168,19 +167,12 @@ El proceso evolutivo se rige por la premisa de la ``supervivencia del más apto'
 \begin{enumerate}
     \item \textbf{Función de Aptitud (\textit{Fitness}):} Es la métrica cuantitativa que evalúa qué tan adecuada es una solución candidata para resolver el problema. En el contexto de optimización, devuelve valores más altos (o penalizaciones más bajas) para los estados óptimos o más cercanos al objetivo.\cite{russell} 
     
-    En el caso del problema de las N-Reinas, el cálculo de la función de aptitud se basa en contar el número de intercepciones o conflictos diagonales entre las reinas. Dos reinas situadas en las columnas $i$ y $j$ (con sus respectivas filas $c_i$ y $c_j$) se encuentran bajo amenaza diagonal si cumplen alguna de las siguientes condiciones matemáticas:
-
-\begin{equation*}
-    c_i - i = c_j - j \quad \text{o} \quad c_i + i = c_j + j
-\end{equation*}
-
-Donde $i \neq j$ para evitar comparar una reina consigo misma. De este modo, el algoritmo recorre toda la población evaluando cada cromosoma para determinar su número de errores \cite{programa_tutos_nreinas}.
+    
 
     \item \textbf{Operadores de Selección:} Mecanismos que eligen a los individuos más aptos de la población actual para que actúen como padres en la siguiente generación, asegurando que los mejores genes tengan mayor probabilidad de heredarse. \cite{ionos} 
     \item \textbf{Operadores de Recombinación y Mutación:} 
     \begin{itemize}
-        \item \textit{Cruce (Crossover):} Combina el material genético de dos padres para crear descendientes que heredan las mejores características parciales de ambos. Para problemas basados en permutaciones, como las N-Reinas, donde no puede haber valores repetidos, se emplean técnicas especializadas como el \textbf{Cruce Parcialmente Asignado (\textit{Partially Mapped Crossover} - PMX)}, el cual selecciona una subcadena de un progenitor y establece relaciones de correspondencia elemento a elemento para mapear e intercambiar los alelos restantes, garantizando la validez de la permutación sin duplicados \cite{goldberg_lingle_pmx}.
-        \item \textit{Mutación:} Modifica aleatoriamente pequeños fragmentos del cromosoma (por ejemplo, intercambiando dos valores en el vector). Su propósito principal es introducir diversidad genética en la población y evitar el estancamiento prematuro en óptimos locales. \cite{ionos} 
+        \item \textit{Cruce (Crossover):} Combina el material genético de dos padres para crear descendientes que heredan las mejores características parciales de ambos. 
     \end{itemize}
 \end{enumerate}
 
@@ -265,8 +257,18 @@ Su procedimiento se presenta en el Algoritmo~\ref{alg:pmx}.
 \end{algorithm}
 
 \section{Aplicaciones (problema de las N-Reinas)}
-Lo que haga harry y pastuso 
 \subsection{Implemetacion}
+
+REVISA HARRY
+En el caso del problema de las N-Reinas, el cálculo de la función de aptitud se basa en contar el número de intercepciones o conflictos diagonales entre las reinas. Dos reinas situadas en las columnas $i$ y $j$ (con sus respectivas filas $c_i$ y $c_j$) se encuentran bajo amenaza diagonal si cumplen alguna de las siguientes condiciones matemáticas:
+
+\begin{equation*}
+    c_i - i = c_j - j \quad \text{o} \quad c_i + i = c_j + j
+\end{equation*}
+
+Donde $i \neq j$ para evitar comparar una reina consigo misma. De este modo, el algoritmo recorre toda la población evaluando cada cromosoma para determinar su número de errores \cite{programa_tutos_nreinas}.
+Para problemas basados en permutaciones, como las N-Reinas, donde no puede haber valores repetidos, se emplean técnicas especializadas como el \textbf{Cruce Parcialmente Asignado (\textit{Partially Mapped Crossover} - PMX)}, el cual selecciona una subcadena de un progenitor y establece relaciones de correspondencia elemento a elemento para mapear e intercambiar los alelos restantes, garantizando la validez de la permutación sin duplicados \cite{goldberg_lingle_pmx}.
+        \item \textit{Mutación:} Modifica aleatoriamente pequeños fragmentos del cromosoma (por ejemplo, intercambiando dos valores en el vector). Su propósito principal es introducir diversidad genética en la población y evitar el estancamiento prematuro en óptimos locales. \cite{ionos} 
 \subsection{Resultados y Hallazgos}
 
 Para evaluar la escalabilidad del algoritmo genético ante el crecimiento factorial del espacio de búsqueda ($N!$), se contrastaron 1\,140 experimentos multidimensionales ($N \in [8, 64]$) frente a un estudio de caso en escala masiva ($N=100$). Los resultados evidencian que el tamaño del tablero condiciona radicalmente la dinámica de convergencia, la sensibilidad de los hiperparámetros y la velocidad de resolución.
@@ -279,7 +281,7 @@ Finalmente, la dinámica temporal confirma un comportamiento bifásico universal
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{figures/heatmap_8_a_64.png}
+    \includegraphics[width=\linewidth]{heatmap_8_a_64.png}
     \caption{Mapa de calor bidimensional de convergencia ($N$ vs $p_m$) ilustrando la compresión del corredor óptimo en tableros grandes.}
     \label{fig:heatmap_convergencia}
 \end{figure}
