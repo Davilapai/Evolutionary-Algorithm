@@ -7,6 +7,7 @@
 \usepackage{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
@@ -55,7 +56,7 @@
         \noindent\textbf{RESUMEN:} \textit{Aquí se escribe un breve resumen.}
 
         \vspace{0.2cm}
-        \noindent\textbf{ABSTRACT:} \textit{Lo mismo pero en ingles}
+        \noindent\textbf{ABSTRACT:} \textit{Lo mismo pero en inglés}
 
         \vspace{0.2cm}
         \noindent\textbf{PALABRAS CLAVE:} Algoritmos Genéticos, Búsqueda Global, Problema de las N-Reinas, Optimización Combinatoria.
@@ -66,13 +67,13 @@
 
 % ======== Introduccion ================
 \section{Introducción}
-El problema de las N-Reinas, consiste en colocar N reinas en un tablero de ajedrez de dimensiones N x N de forma que ninguna de ellas se amenace mutuamente. En el ajedrez convencional, una reina ataca a cualquier pieza que se encuentra en su misma fila, columna o diagonal. 
-Para modelar este problema computacionalmente, se puede emplear una representacion basada en un vector de tamaño N, donde cada indice del vector representa una columna del tablero y el valor almacenado en el representa la fila en la que se ubica la reina. \cite{wiki_nreinas}
-Por ejemplo, para un tablero de 8 reinas, considerese el vector
+El problema de las N-Reinas consiste en colocar N reinas en un tablero de ajedrez de dimensiones N x N de forma que ninguna de ellas se amenace mutuamente. En el ajedrez convencional, una reina ataca a cualquier pieza que se encuentra en su misma fila, columna o diagonal. 
+Para modelar este problema computacionalmente, se puede emplear una representación basada en un vector de tamaño N, donde cada índice del vector representa una columna del tablero y el valor almacenado en él representa la fila en la que se ubica la reina. \cite{wiki_nreinas}
+Por ejemplo, para un tablero de 8 reinas, considérese el vector
 \begin{equation*}
     V_i = [3, 1, 6, 8, 2, 4, 7, 5], \quad \text{donde } i \in \{1, 2, \dots, 8\}
 \end{equation*}
-Siguiendo esta codificacion, en la columna 1 la reina se encuentra en la fila 3, en la columna 2 en la fila 1, y asi sucesivamente. (Ver Figura \ref{fig:tablero_jedrez} para una representacion visual de este vector en un tablero de ajedrez.)
+Siguiendo esta codificación, en la columna 1 la reina se encuentra en la fila 3, en la columna 2 en la fila 1, y así sucesivamente. (Ver Figura \ref{fig:tablero_jedrez} para una representación visual de este vector en un tablero de ajedrez.)
 
 \begin{figure}[H]
     \centering
@@ -92,12 +93,12 @@ Siguiendo esta codificacion, en la columna 1 la reina se encuentra en la fila 3,
     \label{fig:tablero_jedrez}
 \end{figure}
 
-Como se puede observar, este vector contiene los numeros del 1 al 8 sin repeticiones, constituyendo una permutación. Gracias a este diseño, se garantiza que no existan conflictos en filas ni columnas, y el problema se reduce a evitar conflictos en las diagonales, donde las diagonales descendientes se identifican por la ecuacion $i - j = k$ y las diagonales ascendentes por $i + j = k$, siendo $i$ y $j$ los indices de fila y columna respectivamente, y $k$ una constante que identifica cada diagonal. \cite{wiki_nreinas}
+Como se puede observar, este vector contiene los números del 1 al 8 sin repeticiones, constituyendo una permutación. Gracias a este diseño, se garantiza que no existan conflictos en filas ni columnas, y el problema se reduce a evitar conflictos en las diagonales, donde las diagonales descendientes se identifican por la ecuación $i - j = k$ y las diagonales ascendentes por $i + j = k$, siendo $i$ y $j$ los índices de fila y columna respectivamente, y $k$ una constante que identifica cada diagonal. \cite{wiki_nreinas}
 
-Para resolver este tipo de problemas de optimizacion, una primera aproximacion tradicional es el uso de algoritmos de búsqueda local. Estas tecnicas operan con un unico estado actual, moviendose iterativamente hacia sus vecinos. Destacan por utilizar muy poca memoria y por ser capaces de encontrar soluciones razonables en espacios grandes donde los algoritmos sistematicos resultan ineficientes.\cite{russell} Sin embargo, presentan limitaciones significativas, como la tendencia a quedar atrapados en óptimos locales y la dificultad de escapar de ellos. \cite{inaoe}
+Para resolver este tipo de problemas de optimización, una primera aproximación tradicional es el uso de algoritmos de búsqueda local. Estas técnicas operan con un único estado actual, moviéndose iterativamente hacia sus vecinos. Destacan por utilizar muy poca memoria y por ser capaces de encontrar soluciones razonables en espacios grandes donde los algoritmos sistemáticos resultan ineficientes.\cite{russell} Sin embargo, presentan limitaciones significativas, como la tendencia a quedar atrapados en óptimos locales y la dificultad de escapar de ellos. \cite{inaoe}
 
-Al escalar el problema de un tablero fijo de 8 posisciones hacia un tamaño general de N-reinas, el espacio de búsqueda crece de manera factorial (N!). Aunque las tecnicas de busqueda local permiten explorar espacios grandes utilizando pocos recursos de memoria, su rendimiento se ve limitado por la presencia de optimos locales, lo que dificulta encontrar soluciones globales. \cite{inaoe}
-Ante la incapacidad de la búsqueda local tradicional para garantizar una exploracion global efectiva en tableros de gran tamaño, cobran relevancia los algoritmos geneticos. Inspirados en la seleccion natural y la evolución biológica, estos algoritmos emplean una población de soluciones candidatas que evolucionan a lo largo del tiempo mediante operadores de selección, cruce y mutación. Esta estrategia permite explorar el espacio de búsqueda de manera más amplia y efectiva, aumentando la probabilidad de encontrar soluciones óptimas o cercanas al óptimo global. \cite{russell} En este trabajo, se implementa y evalua un algoritmo genetico para abordar el problema de las N reinas. 
+Al escalar el problema de un tablero fijo de 8 posiciones hacia un tamaño general de N-reinas, el espacio de búsqueda crece de manera factorial (N!). Aunque las técnicas de búsqueda local permiten explorar espacios grandes utilizando pocos recursos de memoria, su rendimiento se ve limitado por la presencia de óptimos locales, lo que dificulta encontrar soluciones globales. \cite{inaoe}
+Ante la incapacidad de la búsqueda local tradicional para garantizar una exploración global efectiva en tableros de gran tamaño, cobran relevancia los algoritmos genéticos. Inspirados en la selección natural y la evolución biológica, estos algoritmos emplean una población de soluciones candidatas que evolucionan a lo largo del tiempo mediante operadores de selección, cruce y mutación. Esta estrategia permite explorar el espacio de búsqueda de manera más amplia y efectiva, aumentando la probabilidad de encontrar soluciones óptimas o cercanas al óptimo global. \cite{russell} En este trabajo, se implementa y evalúa un algoritmo genético para abordar el problema de las N reinas. 
 
 % =========== Conceptos y fundamentos teoricos ============
 \section{Fundamentos Teóricos}
@@ -105,7 +106,7 @@ Ante la incapacidad de la búsqueda local tradicional para garantizar una explor
 Los algoritmos genéticos (AG) son métodos de optimización y búsqueda global inspirados en los principios de la evolución biológica y la selección natural de Charles Darwin \cite{ionos}. 
 
 A diferencia de la búsqueda local tradicional que opera sobre un único estado, un algoritmo genético opera sobre una población de individuos generados de forma aleatoria, donde cada individuo representa una solución candidata al problema. Este enfoque puede verse como una variante avanzada de la búsqueda por haz estocástica, en la cual los nuevos estados sucesores no se generan mediante movimientos aleatorios independientes, sino combinando características de dos estados padres \cite{russell}. 
-Para evaluar soluciones en un algoritmo genetico, se utiliza la funcion de evaluacion o aptitud (\textit{fitness}), que asigna un valor cuantitativo a cada individuo, indicando qué tan buena es la solución que representa. Los individuos con mayor aptitud tienen más probabilidades de ser seleccionados para reproducirse y transmitir sus características a la siguiente generación. \cite{laberintos_ag}
+Para evaluar soluciones en un algoritmo genético, se utiliza la función de evaluación o aptitud (\textit{fitness}), que asigna un valor cuantitativo a cada individuo, indicando qué tan buena es la solución que representa. Los individuos con mayor aptitud tienen más probabilidades de ser seleccionados para reproducirse y transmitir sus características a la siguiente generación. \cite{laberintos_ag}
 
 \subsection{Inspiración Biológica}
 Los primeros algoritmos genéticos aparecieron a finales de los años 50 e inicios de los 60, programados por biólogos que buscaban emular el proceso de evolución natural. En 1962, investigadores como G.E.P. Box, G.J. Friedman, W.W. Bledsoe y H.J. Bremermann desarrollaron algoritmos inspirados en la evolución para la optimización de funciones y el aprendizaje automático. Posteriormente, en 1966, L.J. Fogel, A.J. Owens y M.J. Walsh propusieron la programación evolutiva, un enfoque en el cual las posibles soluciones se codificaban mediante máquinas de estado finito sencillas. Su algoritmo funcionaba mutando aleatoriamente una de estas máquinas simuladas y conservando la mejor de las dos. En 1975, se formalizó el concepto de sistemas digitales adaptativos utilizando operaciones de mutación, selección y cruzamiento \cite{sancho}.
@@ -113,7 +114,7 @@ Los primeros algoritmos genéticos aparecieron a finales de los años 50 e inici
 \subsection{Representación y Componentes}
 La analogía biológica se estructura de la siguiente manera:
 \begin{itemize}
-    \item \textbf{Cromosoma (Individuo):} Es la codificación de una solución completa. En problemas de optimización combinatoria, existen diversas formas de representar un cromosoma, como codificación binaria, codificación de enteros, codificación de permutaciones y codificación de árboles. En el caso del problema de las N-Reinas, se utiliza una codificación de vectores de permutacion de enteros.
+    \item \textbf{Cromosoma (Individuo):} Es la codificación de una solución completa. En problemas de optimización combinatoria, existen diversas formas de representar un cromosoma, como codificación binaria, codificación de enteros, codificación de permutaciones y codificación de árboles. En el caso del problema de las N-Reinas, se utiliza una codificación de vectores de permutación de enteros.
     \item \textbf{Población:} Conjunto de individuos que representan soluciones candidatas al problema. La diversidad genética dentro de la población es crucial para explorar efectivamente el espacio de búsqueda y evitar la convergencia prematura hacia soluciones subóptimas. En el caso de las N-Reinas, la población inicial se genera aleatoriamente, asegurando que cada individuo sea una permutación válida de los números del 1 al N. 
     \item \textbf{Genes y Alelos:} Cada posición del cromosoma actúa como un \textit{gen} que especifica una característica individual, mientras que el valor asignado a ese gen se denomina \textit{alelo} (por ejemplo, la fila específica asignada a una columna dada). En la Figura \ref{fig:esquema_nreinas_gen}, se ilustra un ejemplo de cromosoma para el problema de las N-Reinas, donde se resalta un gen específico y su alelo correspondiente.
     \cite{ionos}
@@ -156,7 +157,7 @@ La analogía biológica se estructura de la siguiente manera:
         \node (alelo_text) at (1.8,-1.5) {\normalsize \textbf{\textcolor{red!70!black}{Alelo}}};
 
     \end{tikzpicture}
-    \caption{Representación estructural a color: el contenedor azul resalta el gen (columna) y el numero rojo destaca el alelo (fila) almacenado en su interior.}
+    \caption{Representación estructural a color: el contenedor azul resalta el gen (columna) y el número rojo destaca el alelo (fila) almacenado en su interior.}
     \label{fig:esquema_nreinas_gen}
 \end{figure}
 \end{itemize}
@@ -173,6 +174,7 @@ El proceso evolutivo se rige por la premisa de la ``supervivencia del más apto'
     \item \textbf{Operadores de Recombinación y Mutación:} 
     \begin{itemize}
         \item \textit{Cruce (Crossover):} Combina el material genético de dos padres para crear descendientes que heredan las mejores características parciales de ambos. 
+        \item \textit{Mutación:} Modifica aleatoriamente pequeños fragmentos del cromosoma (por ejemplo, intercambiando dos valores en el vector). Su propósito principal es introducir diversidad genética en la población y evitar el estancamiento prematuro en óptimos locales. \cite{ionos}
     \end{itemize}
 \end{enumerate}
 
@@ -187,41 +189,40 @@ columnas y solo es necesario contar los conflictos diagonales:
 \end{equation*}
 La función de aptitud se define como
 $f(V)=\binom{N}{2}-C(V)$; una solución es válida cuando $C(V)=0$.
-El Algoritmo~\ref{alg:nreinas} adapta el esquema genético general de
-\cite{russell} mediante selección por torneo, elitismo, cruce PMX y
-mutación por intercambio. Estos dos últimos operadores conservan la
-representación basada en permutaciones.
+El Algoritmo~\ref{alg:nreinas} resume la implementación empleada: selección por truncamiento/ordenamiento sobre los mejores individuos, cruce PMX, mutación por intercambio gen a gen y elitismo de dos individuos.
 
 \begin{algorithm}[H]
-\caption{Algoritmo genético para las N-Reinas}
+\caption{Algoritmo genético implementado para las N-Reinas}
 \label{alg:nreinas}
 \begin{algorithmic}[1]
 \scriptsize
-\Require $N$, tamaño $\mu$, generaciones $G_{\max}$ y probabilidad $p_m$
-\Ensure Una permutación $V$ con el menor número de conflictos encontrado
-\State $\mathcal{P}\gets \Call{PoblaciónInicial}{\mu,N}$
+\Require Dimensión $N$, población $\mu$, generaciones $G_{\max}$, tasa de mutación $p_m$
+\Ensure Permutación $V$ con aptitud óptima o la mejor alcanzada
+\State $\mathcal{P}\gets \Call{PoblaciónInicialValida}{\mu, N}$
 \For{$g\gets 1$ \textbf{hasta} $G_{\max}$}
-    \ForAll{$V\in\mathcal{P}$}
-        \State $f(V)\gets \binom{N}{2}-\Call{Conflictos}{V}$
-    \EndFor
-    \If{$\exists V\in\mathcal{P}:\Call{Conflictos}{V}=0$}
-        \State \Return $V$
+    \State $\mathcal{P}\gets \Call{OrdenarPorAptitudDescendente}{\mathcal{P}}$
+    \If{$f(\mathcal{P}[1]) = \binom{N}{2}$}
+        \State \Return $\mathcal{P}[1]$ \Comment{Solución óptima sin conflictos}
     \EndIf
-    \State $V_e\gets\Call{Mejor}{\mathcal{P}}$
     \State $\mathcal{P}'\gets\emptyset$
-    \While{$|\mathcal{P}'|<\mu$}
-        \State $X\gets\Call{Torneo}{\mathcal{P}}$
-        \State $Y\gets\Call{Torneo}{\mathcal{P}}$
-        \State $H\gets\Call{CrucePMX}{X,Y}$
-        \If{$\Call{Aleatorio}{0,1}<p_m$}
-            \State $H\gets\Call{IntercambiarDosGenes}{H}$
-        \EndIf
-        \State $\mathcal{P}'\gets\mathcal{P}'\cup\{H\}$
+    \For{$i\gets 1$ \textbf{hasta} $\lfloor\frac{2}{3}\mu\rfloor - 1$ \textbf{paso} $2$} \Comment{Cruce de parejas élite}
+        \State $\mathcal{P}'\gets \mathcal{P}' \cup \{\Call{PMX}{\mathcal{P}[i], \mathcal{P}[i+1]}, \Call{PMX}{\mathcal{P}[i+1], \mathcal{P}[i]}\}$
+    \EndFor
+    \While{$|\mathcal{P}'| < \mu - 2$} \Comment{Completar hijos con el top 50\%}
+        \State $X, Y \gets \Call{MuestreoAleatorio}{\mathcal{P}[1 \ldots \lfloor\mu/2\rfloor], 2}$
+        \State $\mathcal{P}'\gets \mathcal{P}' \cup \{\Call{PMX}{X, Y}\}$
     \EndWhile
-    \State \Call{ReemplazarPeor}{$\mathcal{P}',V_e$}
-    \State $\mathcal{P}\gets\mathcal{P}'$
+    \ForAll{$H \in \mathcal{P}'$} \Comment{Mutación por intercambio gen a gen}
+        \For{$j\gets 1$ \textbf{hasta} $N$}
+            \If{$\Call{Aleatorio}{0,1} < p_m$}
+                \State $k \gets \Call{AleatorioEntero}{1, N}$
+                \State $\Call{Intercambiar}{H[j], H[k]}$
+            \EndIf
+        \EndFor
+    \EndFor
+    \State $\mathcal{P}\gets \mathcal{P}' \cup \{\mathcal{P}[1], \mathcal{P}[2]\}$ \Comment{Elitismo (2 mejores)}
 \EndFor
-\State \Return $\Call{Mejor}{\mathcal{P}}$
+\State \Return $\mathcal{P}[1]$
 \end{algorithmic}
 \end{algorithm}
 
@@ -257,18 +258,23 @@ Su procedimiento se presenta en el Algoritmo~\ref{alg:pmx}.
 \end{algorithm}
 
 \section{Aplicaciones (problema de las N-Reinas)}
-\subsection{Implemetacion}
+\subsection{Implementación}
 
-REVISA HARRY
-En el caso del problema de las N-Reinas, el cálculo de la función de aptitud se basa en contar el número de intercepciones o conflictos diagonales entre las reinas. Dos reinas situadas en las columnas $i$ y $j$ (con sus respectivas filas $c_i$ y $c_j$) se encuentran bajo amenaza diagonal si cumplen alguna de las siguientes condiciones matemáticas:
+\paragraph{Representación del individuo y cromosoma.} ~\\
+La representación de cada individuo fue realizada mediante un arreglo de NumPy de tamaño $N$, donde cada índice representa una columna del tablero y el valor almacenado representa la fila en la que se ubica la reina. Siempre se garantiza que cada cromosoma sea una permutación válida de los números del 0 al $N-1$. El estado inicial de la población se genera aleatoriamente; esta representación restringe el espacio de $N^N$ a $N!$ al garantizar que cada cromosoma es una permutación válida.
 
-\begin{equation*}
-    c_i - i = c_j - j \quad \text{o} \quad c_i + i = c_j + j
-\end{equation*}
+\paragraph{Función de aptitud.} ~\\
+Para la evaluación de la aptitud, se implementó una función que calcula el número de pares de reinas que se atacan entre sí. Para esta función, en lugar de realizar comparaciones par a par $O(N^2)$, se implementó un algoritmo de conteo de colisiones diagonales en $O(N)$, utilizando dos arreglos auxiliares para contar el número de reinas en cada diagonal ascendente y descendente. La función de aptitud se define como $f(V)=\binom{N}{2}-C(V)$, donde $C(V)$ es el número de pares de reinas que se atacan entre sí.
 
-Donde $i \neq j$ para evitar comparar una reina consigo misma. De este modo, el algoritmo recorre toda la población evaluando cada cromosoma para determinar su número de errores \cite{programa_tutos_nreinas}.
-Para problemas basados en permutaciones, como las N-Reinas, donde no puede haber valores repetidos, se emplean técnicas especializadas como el \textbf{Cruce Parcialmente Asignado (\textit{Partially Mapped Crossover} - PMX)}, el cual selecciona una subcadena de un progenitor y establece relaciones de correspondencia elemento a elemento para mapear e intercambiar los alelos restantes, garantizando la validez de la permutación sin duplicados \cite{goldberg_lingle_pmx}.
-        \item \textit{Mutación:} Modifica aleatoriamente pequeños fragmentos del cromosoma (por ejemplo, intercambiando dos valores en el vector). Su propósito principal es introducir diversidad genética en la población y evitar el estancamiento prematuro en óptimos locales. \cite{ionos} 
+\paragraph{Operador de cruce.} ~\\
+Se implementó el operador de cruce parcialmente asignado (PMX) para generar descendientes que son una permutación válida de los padres, evitando duplicados y manteniendo la validez del cromosoma.
+
+\paragraph{Selección y elitismo.} ~\\
+El método de selección desarrollado toma el top $2 \mu/3$ de la población y realiza un cruce sistemático entre ellos, mientras que el resto de los descendientes se generan mediante muestreo aleatorio del top $50\%$ de la población. Se implementó elitismo de dos individuos, asegurando que los dos mejores individuos de la generación actual se mantengan en la siguiente generación.
+
+\paragraph{Mutación.} ~\\
+El operador de mutación utilizado intercambia alelos aleatoriamente con una probabilidad $p_m$, donde $p_m$ es la tasa de mutación. 
+
 \subsection{Resultados y Hallazgos}
 
 Para evaluar la escalabilidad del algoritmo genético ante el crecimiento factorial del espacio de búsqueda ($N!$), se contrastaron 1\,140 experimentos multidimensionales ($N \in [8, 64]$) frente a un estudio de caso en escala masiva ($N=100$). Los resultados evidencian que el tamaño del tablero condiciona radicalmente la dinámica de convergencia, la sensibilidad de los hiperparámetros y la velocidad de resolución.
