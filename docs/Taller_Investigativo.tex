@@ -6,6 +6,7 @@
 \usepackage[spanish]{babel}
 \usepackage{geometry}
 \usepackage{graphicx}
+\graphicspath{{figures/}{../figures/}}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{algorithm}
@@ -274,18 +275,23 @@ El operador de mutación utilizado intercambia alelos aleatoriamente con una pro
 
 \subsection{Resultados y Hallazgos}
 
-Para evaluar la escalabilidad del algoritmo genético ante el crecimiento factorial del espacio de búsqueda ($N!$), se contrastaron 1\,140 experimentos multidimensionales ($N \in [8, 64]$) frente a un estudio de caso en escala masiva ($N=100$). Los resultados evidencian que el tamaño del tablero condiciona radicalmente la dinámica de convergencia, la sensibilidad de los hiperparámetros y la velocidad de resolución.
+La exploración experimental multidimensional del algoritmo genético (cruce PMX, mutación por intercambio y elitismo) sobre el problema de las N-Reinas revela que la dinámica de convergencia está gobernada por el acoplamiento no lineal entre la dimensión del tablero ($N$) y el tamaño de la población ($M$). Para caracterizar este comportamiento ante el crecimiento factorial del espacio de búsqueda ($N!$), se contrastaron 1\,140 experimentos multidimensionales ($N \in [8, 64]$) frente a un estudio de caso en escala masiva ($N=100$, $M=300$), junto con una exploración sistemática de la variación del tamaño de la población ($M \in [20, 500]$ para $N=25$).
 
-En primer lugar, la dificultad del problema se segmenta en tres categorías operativas: en tableros pequeños ($N \le 20$), el algoritmo exhibe alta robustez con una tasa de éxito global del 81.5\,\% y una mediana de convergencia en apenas 12 generaciones. En tableros medianos ($21 \le N \le 40$), la tasa de éxito general se reduce al 27.5\,\% (mediana de 74 épocas), mientras que en tableros grandes ($41 \le N \le 64$) desciende al 12.9\,\% (mediana de 173 épocas). No obstante, esta disminución no refleja una incapacidad intrínseca del algoritmo: al calibrar la tasa de mutación en su franja óptima ($p_m^*$), se logró un 100\,\% de convergencia a cero colisiones en los 57 tamaños de tablero evaluados, extendiéndose exitosamente hasta $N=100$ ($100! \approx 9.33 \times 10^{157}$) en 4\,732 generaciones mediante el refuerzo poblacional ($m=300$).
+\paragraph{Dinámica por dimensión del tablero ($N \in [8, 100]$).}
+Ante la variación del tamaño del tablero, el crecimiento factorial del espacio de búsqueda comprime drásticamente el espacio de parámetros viables. En tableros pequeños ($N \le 20$), el algoritmo exhibe alta tolerancia estocástica, logrando una tasa de éxito global del 81.5\,\% con una mediana de convergencia en apenas 12 generaciones. Al escalar hacia tableros medianos ($21 \le N \le 40$), la tasa de éxito general se reduce al 27.5\,\% (mediana de 74 épocas), y en tableros grandes ($41 \le N \le 64$) desciende al 12.9\,\% (mediana de 173 épocas). Conforme $N$ escala hacia tableros grandes ($N > 40$), la tasa de éxito colapsa al 0\,\% para tasas de mutación $p_m > 0.04$, debido a que múltiples intercambios simultáneos (\textit{swaps}) desarticulan los bloques constructivos preservados por el cruce PMX.
 
-En segundo lugar, el análisis topográfico bidimensional ($N$ vs $p_m$, Figura~\ref{fig:heatmap_convergencia}) revela que el incremento de $N$ comprime severamente el corredor de mutación viable. Mientras que en tableros pequeños cualquier mutación entre 0.01 y 0.20 permite converger, para $N \ge 41$ las tasas superiores a 0.04 destruyen los bloques constructivos del cruce PMX, provocando un colapso del éxito al 0\,\%. A partir de este fenómeno se formuló la \textit{Ley de Invarianza de la Perturbación Genómica}: para preservar la estabilidad del cromosoma, el número esperado de intercambios debe conservarse constante en torno a una mediana de $\mathbb{E}[\text{swaps}] = N \times p_m^*(N) \approx 0.62$, deduciendo la regla de escalabilidad $p_m^*(N) \approx 0.6 / N$.
+No obstante, al calibrar la tasa de mutación en su franja óptima ($p_m^*$), el algoritmo resolvió el 100\,\% de los 57 tableros evaluados, alcanzando cero colisiones incluso en $N=100$ ($100! \approx 9.33 \times 10^{157}$) en 4\,732 generaciones mediante el refuerzo poblacional ($M=300$). De esta dinámica emerge la \textbf{Ley de Invarianza de Perturbación Genómica}: el producto esperado de intercambios por individuo permanece cuasi-constante en torno a $\mathbb{E}[\text{swaps}] = N \times p_m^*(N) \approx 0.62$, de donde se deduce la regla de escalabilidad hiperbólica:
+\begin{equation}
+    p_m^*(N) \approx \frac{0.6}{N}
+    \label{eq:ley_perturbacion}
+\end{equation}
 
-Finalmente, la dinámica temporal confirma un comportamiento bifásico universal invariante a la escala: una fase macroscópica inicial donde el cruce PMX reduce más del 80\,\% de las colisiones en las primeras decenas de generaciones, sucedida por una meseta asintótica donde la mutación puntual bajo elitismo resuelve los últimos conflictos diagonales.
+Como se ilustra en el mapa de calor de la Figura~\ref{fig:heatmap_convergencia}, el corredor de mutación viable sufre una compresión hiperbólica a medida que $N$ crece, conllevando al colapso de convergencia ante hiperparámetros no calibrados frente al crecimiento factorial $N!$.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{heatmap_8_a_64.png}
-    \caption{Mapa de calor bidimensional de convergencia ($N$ vs $p_m$) ilustrando la compresión del corredor óptimo en tableros grandes.}
+    \caption{Dinámica por dimensión del tablero ($N \in [8, 64]$ vs $p_m$): compresión hiperbólica del corredor de mutación viable y colapso de convergencia en mutaciones no calibradas ante el crecimiento factorial de $N!$.}
     \label{fig:heatmap_convergencia}
 \end{figure}
 
